@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "contentCreation": "Content Creation",
+    "contentCalender": "Content Calender",
+    "publishing": "Publishing",
+    "analytics": "Analytics",
+    "settings": "Settings"
+  },
+  "contentCreation": {
+    "model": "Model",
+    "product": "Product Category",
+    "models": {
+      "auto": "Auto",
+      "deepseek": "DeepSeek-V3.1",
+      "gpt41": "GPT-4.1",
+      "gpt4": "GPT-4",
+      "o3mini": "O3-mini"
+    },
+    "products": {
+      "fitness": "Fitness",
+      "motherBaby": "Mother & Baby",
+      "beauty": "Beauty",
+      "sportsEquipment": "Sports Equipment"
+    },
+    "platformContent": {
+      "clickToGenerate": "Click the title above to generate {{platform}} promotional content"
+    }
+  },
+  "email": {
+    "welcome": "Welcome to HypeCatAI",
+    "description": "Please enter your email address to continue. We'll use this to save your preferences and content.",
+    "placeholder": "Enter your email address",
+    "submit": "Continue",
+    "submitting": "Saving...",
+    "required": "Email is required",
+    "invalid": "Please enter a valid email address",
+    "error": "Failed to save email. Please try again."
+  }
+}

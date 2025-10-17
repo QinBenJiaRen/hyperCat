@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "contentCreation": "内容创作",
+    "contentCalender": "内容日历",
+    "publishing": "发布管理",
+    "analytics": "数据分析",
+    "settings": "设置"
+  },
+  "contentCreation": {
+    "model": "模型",
+    "product": "产品类别",
+    "models": {
+      "auto": "自动",
+      "deepseek": "DeepSeek-V3.1",
+      "gpt41": "GPT-4.1",
+      "gpt4": "GPT-4",
+      "o3mini": "O3-mini"
+    },
+    "products": {
+      "fitness": "健身",
+      "motherBaby": "母婴",
+      "beauty": "美妆",
+      "sportsEquipment": "运动器材"
+    },
+    "platformContent": {
+      "clickToGenerate": "点击上方标题生成{{platform}}平台的推广文案"
+    }
+  },
+  "email": {
+    "welcome": "欢迎使用HypeCatAI",
+    "description": "请输入您的邮箱地址以继续。我们将用它来保存您的偏好设置和内容。",
+    "placeholder": "请输入邮箱地址",
+    "submit": "继续",
+    "submitting": "保存中...",
+    "required": "请输入邮箱地址",
+    "invalid": "请输入有效的邮箱地址",
+    "error": "保存邮箱失败，请重试。"
+  }
+}
