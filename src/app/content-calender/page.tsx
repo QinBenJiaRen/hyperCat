@@ -229,9 +229,6 @@ export default function ContentCalenderPage() {
                   ),
                   event: EventComponent
                 }}
-                components={{
-                  event: EventComponent
-                }}
                 className="calendar-container"
               />
             </div>
