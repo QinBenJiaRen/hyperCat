@@ -31,10 +31,17 @@ export default function DashboardPage() {
   const [titles, setTitles] = useState([])
   const [selectedTitle, setSelectedTitle] = useState('')
   const [generatedContent, setGeneratedContent] = useState({ instagram: '', facebook: '', twitter: '' })
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
   const { t, i18n } = useTranslation()
   
   const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     i18n.changeLanguage(event.target.value)
+  }
+
+  const handleEmailSubmit = async (email: string) => {
+    // Handle email submission logic here
+    console.log('Email submitted:', email)
+    setIsEmailModalOpen(false)
   }
 
   const handleGenerateContent = async () => {
@@ -80,7 +87,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen">
-      <EmailModal />
+      <EmailModal isOpen={isEmailModalOpen} onSubmit={handleEmailSubmit} />
       
       {/* Sidebar */}
       <div className="w-64 bg-gray-800 text-white p-4">
