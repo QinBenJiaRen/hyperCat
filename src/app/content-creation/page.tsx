@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import MainLayout from '../../components/MainLayout'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 
 export default function ContentCreationPage() {
   const router = useRouter()
@@ -19,28 +21,95 @@ export default function ContentCreationPage() {
 
   const [selectedModel, setSelectedModel] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('selectedModel') || 'deepseek'
+      return localStorage.getItem('selectedModel') || 'gpt4'  // 默认使用 gpt4
     }
-    return 'gpt-4'
+    return 'gpt4'  // 服务端渲染时的默认值
   })
 
-  const [productInfo, setProductInfo] = useState('')
+  const [productInfo, setProductInfo] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('productInfo') || ''
+    }
+    return ''
+  })
 
-  const [keywords, setKeywords] = useState<string[]>([])
+  const [keywords, setKeywords] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const savedKeywords = localStorage.getItem('keywords')
+      return savedKeywords ? JSON.parse(savedKeywords) : []
+    }
+    return []
+  })
 
   const [isSensitiveFilterEnabled, setIsSensitiveFilterEnabled] = useState(true)
 
-  const [generatedContent, setGeneratedContent] = useState({ content: '', hasError: false })
+  const [generatedContent, setGeneratedContent] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedContent = localStorage.getItem('generatedContent')
+      return savedContent ? JSON.parse(savedContent) : { content: '', hasError: false }
+    }
+    return { content: '', hasError: false }
+  })
 
   const [platformContent, setPlatformContent] = useState<{
     [key: string]: {
       [title: string]: string;
     };
-  }>({ instagram: {}, facebook: {}, x: {} })
+  }>(() => {
+    if (typeof window !== 'undefined') {
+      const savedContent = localStorage.getItem('platformContent')
+      return savedContent ? JSON.parse(savedContent) : { instagram: {}, facebook: {}, x: {} }
+    }
+    return { instagram: {}, facebook: {}, x: {} }
+  })
 
-  const [selectedTitle, setSelectedTitle] = useState('')
+  const [selectedTitle, setSelectedTitle] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('selectedTitle') || ''
+    }
+    return ''
+  })
 
   const [isGeneratingPlatformContent, setIsGeneratingPlatformContent] = useState(false)
+  
+  // 添加生成内容的加载状态
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  // 使用 useEffect 来保存状态到 localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('productInfo', productInfo)
+      localStorage.setItem('keywords', JSON.stringify(keywords))
+      localStorage.setItem('generatedContent', JSON.stringify(generatedContent))
+      localStorage.setItem('platformContent', JSON.stringify(platformContent))
+      localStorage.setItem('selectedTitle', selectedTitle)
+      localStorage.setItem('selectedPlatform', selectedPlatform)
+      localStorage.setItem('selectedModel', selectedModel)
+    }
+  }, [productInfo, keywords, generatedContent, platformContent, selectedTitle, selectedPlatform, selectedModel])
+
+  // 添加刷新页面时清除数据的处理
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // 清除所有存储的数据
+      localStorage.removeItem('productInfo')
+      localStorage.removeItem('keywords')
+      localStorage.removeItem('generatedContent')
+      localStorage.removeItem('platformContent')
+      localStorage.removeItem('selectedTitle')
+      localStorage.removeItem('selectedPlatform')
+      localStorage.removeItem('selectedModel')
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [])
+  
+  // 添加发布日期状态
+  const [publishDate, setPublishDate] = useState<Date>(new Date())
 
   // 保存状态到 localStorage
   const saveToLocalStorage = () => {
@@ -138,7 +207,7 @@ export default function ContentCreationPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: selectedModel === 'auto' ? 'deepseek' : selectedModel,
+          model: selectedModel,  // 让后端处理 auto 的情况
           keywords,
           platform,
           language: currentLanguage,
@@ -195,6 +264,9 @@ ${langConfig.productInfo}${productInfo}`
       return
     }
 
+    // 设置加载状态
+    setIsGenerating(true)
+
     // 清空所有之前生成的内容
     setGeneratedContent({
       content: '',
@@ -213,13 +285,11 @@ ${langConfig.productInfo}${productInfo}`
         hasError: false
       })
 
-      const modelToUse = selectedModel === 'auto' ? 'deepseek' : selectedModel
-      
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: modelToUse,
+          model: selectedModel,  // 让后端处理 auto 的情况
           keywords: keywords,
           prompt: productInfo,
           sensitiveFilter: isSensitiveFilterEnabled
@@ -237,6 +307,9 @@ ${langConfig.productInfo}${productInfo}`
         content: '',
         hasError: true
       })
+    } finally {
+      // 无论成功还是失败，都需要重置加载状态
+      setIsGenerating(false)
     }
   }
 
@@ -314,9 +387,21 @@ ${langConfig.productInfo}${productInfo}`
               {/* Generate Button */}
               <button
                 onClick={handleGenerateContent}
-                className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+                disabled={isGenerating}
+                className={`w-full py-3 rounded-lg font-medium transition-colors flex items-center justify-center ${
+                  isGenerating 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-orange-500 hover:bg-orange-600'
+                } text-white`}
               >
-                Generate Content
+                {isGenerating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                    Generating...
+                  </>
+                ) : (
+                  'Generate Content'
+                )}
               </button>
             </div>
 
@@ -440,7 +525,17 @@ ${langConfig.productInfo}${productInfo}`
                       <div className="prose max-w-none text-gray-700 leading-relaxed">
                         {platformContent[selectedPlatform][selectedTitle].split('\n').slice(1).join('\n')}
                       </div>
-                      <div className="flex justify-end pt-2">
+                      <div className="flex items-center justify-between pt-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-600">Publish date:</span>
+                          <DatePicker
+                            selected={publishDate}
+                            onChange={(date: Date) => setPublishDate(date)}
+                            className="w-40 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            dateFormat="yyyy-MM-dd"
+                            minDate={new Date()}
+                          />
+                        </div>
                           <style jsx>{`
                             @keyframes checkmark {
                               0% {
@@ -463,50 +558,62 @@ ${langConfig.productInfo}${productInfo}`
                             }
                           `}</style>
                           <button
-                          onClick={() => {
+                          className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                          onClick={async () => {
                             if (!selectedTitle || !platformContent[selectedPlatform][selectedTitle]) {
                               alert('No content to publish');
                               return;
                             }
 
                             try {
-                              const now = new Date();
-                              // 确保标题和内容正确格式化
-                              const titleLine = platformContent[selectedPlatform][selectedTitle].split('\n')[0];
-                              const promotionalContent = platformContent[selectedPlatform][selectedTitle]
-                                .split('\n')
-                                .slice(1)
-                                .join('\n')
-                                .trim();
-                              
-                              const event = {
-                                id: now.getTime().toString(),
-                                title: titleLine.replace(/^\d+\.\s*/, '').trim(), // 移除标题前的数字
-                                start: now,
-                                end: new Date(now.getTime() + 24 * 60 * 60 * 1000), // 设置结束时间为24小时后
-                                content: platformContent[selectedPlatform][selectedTitle],
+                              // 使用用户选择的发布日期
+                              const selectedDate = new Date(publishDate);
+                              // 设置为当天的早上9点
+                              selectedDate.setHours(9, 0, 0, 0);
+
+                              // 处理内容
+                              const fullContent = platformContent[selectedPlatform][selectedTitle];
+                              const lines = fullContent.split('\n');
+                              const title = lines[0].replace(/^\d+\.\s*/, '').trim();
+                              const promo = lines.slice(1).join('\n').trim();
+
+                              // 设置社交媒体颜色
+                              const colors: Record<string, string> = {
+                                instagram: '#E1306C',
+                                facebook: '#1877F2',
+                                x: '#000000'
+                              };
+
+                              // 创建事件
+                              const newEvent = {
+                                id: `${Date.now()}`,
+                                title,
+                                start: selectedDate,
+                                end: new Date(selectedDate.getTime() + 43200000), // +12小时
+                                backgroundColor: colors[selectedPlatform],
                                 platform: selectedPlatform,
-                                allDay: true,
-                                promotionalContent: promotionalContent
+                                allDay: false,
+                                content: fullContent,
+                                promotionalContent: promo
                               };
 
                               // 读取现有事件
                               const existing = JSON.parse(localStorage.getItem('contentCalenderEvents') || '[]');
                               
                               // 添加新事件到开头（保持降序）
-                              localStorage.setItem('contentCalenderEvents', JSON.stringify([event, ...existing]));
+                              localStorage.setItem('contentCalenderEvents', JSON.stringify([newEvent, ...existing]));
 
                               // 显示发布成功动画
                               const button = document.activeElement as HTMLButtonElement;
                               if (button) {
                                 button.classList.add('success');
                                 button.disabled = true;
-                                button.innerHTML = `
-                                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                const successIcon = (
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                   </svg>
-                                  Published!
-                                `;
+                                );
+                                button.textContent = 'Published!';
                                 
                                 // 2秒后重置按钮并跳转
                                 setTimeout(() => {
@@ -518,7 +625,6 @@ ${langConfig.productInfo}${productInfo}`
                               alert('Failed to publish content. Please try again.');
                             }
                           }}
-                          className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                         >
                           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

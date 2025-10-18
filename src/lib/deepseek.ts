@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-const DEEPSEEK_API_BASE_URL = process.env.DEEPSEEK_API_BASE_URL || 'https://api.deepseek.ai/v1';
-const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat-v1-33b';
+const DEEPSEEK_API_BASE_URL = process.env.DEEPSEEK_API_BASE_URL || 'https://api.deepseek.com/v1';
+const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 
 interface DeepSeekResponse {
   choices: Array<{
@@ -18,14 +18,22 @@ export const generateWithDeepSeek = async (systemPrompt: string, userPrompt: str
       throw new Error('DeepSeek API key is not configured');
     }
 
+    // 增加请求前的详细日志
     console.log('DeepSeek API Request:', {
       url: `${DEEPSEEK_API_BASE_URL}/chat/completions`,
       model: DEEPSEEK_MODEL,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
-      ]
+      ],
+      apiKeyPrefix: DEEPSEEK_API_KEY?.substring(0, 8),
+      baseUrl: DEEPSEEK_API_BASE_URL
     });
+
+    // 验证环境变量
+    if (!DEEPSEEK_API_BASE_URL) {
+      throw new Error('DeepSeek API base URL is not configured');
+    }
 
     const response = await axios.post<DeepSeekResponse>(
       `${DEEPSEEK_API_BASE_URL}/chat/completions`,

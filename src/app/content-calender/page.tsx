@@ -30,11 +30,12 @@ interface Event {
   allDay?: boolean
   platform?: 'instagram' | 'facebook' | 'x'
   promotionalContent?: string
+  backgroundColor?: string
 }
 
 // Custom event component for calendar
 const EventComponent = ({ event }: { event: Event }) => {
-  const maxLen = 40
+  const maxLen = 30
   const plainTitle = event.title || ''
   const display = plainTitle.length > maxLen ? plainTitle.slice(0, maxLen - 1) + '…' : plainTitle
   
@@ -44,11 +45,20 @@ const EventComponent = ({ event }: { event: Event }) => {
 
   return (
     <div 
-      title={`${plainTitle}\n\n${event.promotionalContent || ''}`}
-      className="truncate flex items-center gap-1"
+      className="group relative flex items-center gap-1 p-1 rounded hover:bg-gray-100"
     >
       <span className="flex-shrink-0">{platformIcon}</span>
       <span className="truncate">{display}</span>
+      
+      {/* Tooltip */}
+      <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50 w-64 p-4 bg-white rounded-lg shadow-xl border border-gray-200">
+        <div className="text-sm">
+          <div className="font-medium text-gray-900 mb-1">{plainTitle}</div>
+          <div className="text-gray-600 whitespace-pre-wrap text-xs">
+            {event.promotionalContent}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

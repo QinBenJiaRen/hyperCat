@@ -6,6 +6,9 @@ export async function POST(req: Request) {
   try {
     const { prompt, model, keywords = [], language = 'en' } = await req.json()
     
+    // 设置默认模型为 gpt4
+    const selectedModel = !model || model === 'auto' ? 'gpt4' : model
+
     // Multi-language system prompts
     const systemPromptTemplates = {
       en: {
@@ -85,12 +88,15 @@ Anforderungen:
     const userPrompt = `${userPromptPrefix[selectedLanguage as keyof typeof userPromptPrefix]} ${prompt}`
     
     let content;
-    if (model === 'deepseek') {
+    if (selectedModel === 'deepseek') {
       content = await generateWithDeepSeek(systemPrompt, userPrompt)
     } else {
-      // Default to OpenAI for other models (gpt4, auto, etc.)
-      content = await generateContent(systemPrompt, userPrompt)
+      // 将模型参数传递给 generateContent
+      content = await generateContent(systemPrompt, userPrompt, selectedModel)
     }
+    
+    // 记录使用的模型
+    console.log('Using model:', selectedModel);
     
     return NextResponse.json({ content })
   } catch (error) {
