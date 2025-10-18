@@ -35,8 +35,11 @@ export const generateWithDeepSeek = async (systemPrompt: string, userPrompt: str
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.8,
-        max_tokens: 1000,
+        temperature: 0.7,
+        max_tokens: 2048,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
       },
       {
         headers: {
@@ -47,8 +50,20 @@ export const generateWithDeepSeek = async (systemPrompt: string, userPrompt: str
     );
 
     return response.data.choices[0].message.content;
-  } catch (error) {
-    console.error('Error generating content with DeepSeek:', error);
+  } catch (error: any) {
+    console.error('Error generating content with DeepSeek:', {
+      error: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      headers: error.response?.headers,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers,
+        data: error.config?.data
+      }
+    });
     throw error;
   }
 };
