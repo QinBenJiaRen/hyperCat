@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-const DEEPSEEK_API_BASE_URL = process.env.DEEPSEEK_API_BASE_URL || 'https://api.deepseek.com/v1';
-const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
+const DEEPSEEK_API_BASE_URL = process.env.DEEPSEEK_API_BASE_URL || 'https://api.deepseek.ai/v1';
+const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat-v1-33b';
 
 interface DeepSeekResponse {
   choices: Array<{
@@ -17,6 +17,15 @@ export const generateWithDeepSeek = async (systemPrompt: string, userPrompt: str
     if (!DEEPSEEK_API_KEY) {
       throw new Error('DeepSeek API key is not configured');
     }
+
+    console.log('DeepSeek API Request:', {
+      url: `${DEEPSEEK_API_BASE_URL}/chat/completions`,
+      model: DEEPSEEK_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]
+    });
 
     const response = await axios.post<DeepSeekResponse>(
       `${DEEPSEEK_API_BASE_URL}/chat/completions`,
