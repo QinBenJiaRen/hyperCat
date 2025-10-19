@@ -10,6 +10,42 @@
   "contentCreation": {
     "model": "Model",
     "product": "Product Category",
+    "purpose": "Purpose",
+    "productInformation": "Product Information",
+    "productPlaceholder": "Tell us about your product...",
+    "hotKeywords": "Hot Keywords",
+    "realtimeTrends": "Realtime trends update",
+    "hotTitles": "Hot Titles",
+    "generating": "Generating...",
+    "generate": "Generate",
+    "noSensitiveWords": "No sensitive words found",
+    "sensitiveFilter": "Sensitive Word Filter",
+    "publishDate": "Publish date:",
+    "publishing": "Publishing",
+    "published": "Published!",
+    "noContentToPublish": "No content to publish",
+    "publishError": "Failed to publish content. Please try again.",
+    "enterProductInfo": "Please enter product information",
+    "requestTimeout": "Request timeout (15s) - please try again",
+    "generateError": "Failed to generate content - please try again",
+    "refreshContent": "Refresh content for current platform",
+    "refreshError": "Failed to refresh content - please try again",
+    "selectTitleFirst": "Please select a title first",
+    "productImages": "Product Images",
+    "uploadImage": "Upload Image",
+    "removeImage": "Remove image",
+    "maxImagesLimit": "Maximum 5 images allowed",
+    "invalidImageType": "Please upload image files only",
+    "imageTooLarge": "Image size should not exceed 5MB",
+    "onboarding": {
+      "step1": "Choose your favorite LLM Model",
+      "step2": "You may input product names or even ingredients",
+      "step3": "This post is for which purpose",
+      "step4": "Link your post with the newly-updated trendy words",
+      "dontShowAgain": "Don't show again",
+      "continue": "Continue",
+      "skip": "Skip"
+    },
     "models": {
       "auto": "Auto",
       "deepseek": "DeepSeek-V3.1",
@@ -22,6 +58,9 @@
       "motherBaby": "Mother & Baby",
       "beauty": "Beauty",
       "sportsEquipment": "Sports Equipment"
+    },
+    "purposes": {
+      "ecommerce": "E-commerce Promotion"
     },
     "platformContent": {
       "clickToGenerate": "Click the title above to generate {{platform}} promotional content"
@@ -36,5 +75,20 @@
     "required": "Email is required",
     "invalid": "Please enter a valid email address",
     "error": "Failed to save email. Please try again."
+  },
+  "feedback": {
+    "title": "Feedback",
+    "subtitle": "We value your feedback! Please share your thoughts with us.",
+    "typeLabel": "Feedback Type",
+    "bug": "Bug Report",
+    "suggestion": "Suggestion",
+    "other": "Other",
+    "messageLabel": "Your Message",
+    "placeholder": "Please describe your feedback in detail...",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "thankYou": "Thank You!",
+    "submitted": "Your feedback has been submitted successfully."
   }
 }

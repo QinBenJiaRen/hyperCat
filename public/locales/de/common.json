@@ -10,6 +10,42 @@
   "contentCreation": {
     "model": "Modell",
     "product": "Produktkategorie",
+    "purpose": "Zweck",
+    "productInformation": "Produktinformationen",
+    "productPlaceholder": "Erzählen Sie uns von Ihrem Produkt...",
+    "hotKeywords": "Top-Keywords",
+    "realtimeTrends": "Echtzeit-Trends-Update",
+    "hotTitles": "Top-Titel",
+    "generating": "Generieren...",
+    "generate": "Generieren",
+    "noSensitiveWords": "Keine sensiblen Wörter gefunden",
+    "sensitiveFilter": "Filter für sensible Wörter",
+    "publishDate": "Veröffentlichungsdatum:",
+    "publishing": "Veröffentlichen",
+    "published": "Veröffentlicht!",
+    "noContentToPublish": "Kein Inhalt zum Veröffentlichen",
+    "publishError": "Fehler beim Veröffentlichen des Inhalts. Bitte versuchen Sie es erneut.",
+    "enterProductInfo": "Bitte geben Sie Produktinformationen ein",
+    "requestTimeout": "Anfrage-Timeout (15s) - bitte versuchen Sie es erneut",
+    "generateError": "Fehler beim Generieren des Inhalts - bitte versuchen Sie es erneut",
+    "refreshContent": "Inhalt für aktuelle Plattform aktualisieren",
+    "refreshError": "Fehler beim Aktualisieren des Inhalts - bitte versuchen Sie es erneut",
+    "selectTitleFirst": "Bitte wählen Sie zuerst einen Titel aus",
+    "productImages": "Produktbilder",
+    "uploadImage": "Bild hochladen",
+    "removeImage": "Bild entfernen",
+    "maxImagesLimit": "Maximal 5 Bilder erlaubt",
+    "invalidImageType": "Bitte nur Bilddateien hochladen",
+    "imageTooLarge": "Bildgröße sollte 5MB nicht überschreiten",
+    "onboarding": {
+      "step1": "Wählen Sie Ihr bevorzugtes LLM-Modell",
+      "step2": "Sie können Produktnamen oder sogar Zutaten eingeben",
+      "step3": "Für welchen Zweck ist dieser Beitrag",
+      "step4": "Verknüpfen Sie Ihren Beitrag mit den neuesten Trendwörtern",
+      "dontShowAgain": "Nicht mehr anzeigen",
+      "continue": "Weiter",
+      "skip": "Überspringen"
+    },
     "models": {
       "auto": "Auto",
       "deepseek": "DeepSeek-V3.1",
@@ -22,6 +58,12 @@
       "motherBaby": "Mutter & Baby",
       "beauty": "Schönheit",
       "sportsEquipment": "Sportausrüstung"
+    },
+    "purposes": {
+      "ecommerce": "E-Commerce-Werbung"
+    },
+    "platformContent": {
+      "clickToGenerate": "Klicken Sie oben auf den Titel, um {{platform}}-Werbeinhalte zu generieren"
     }
   },
   "email": {
@@ -33,5 +75,20 @@
     "required": "E-Mail-Adresse ist erforderlich",
     "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
     "error": "E-Mail konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+  },
+  "feedback": {
+    "title": "Rückmeldung",
+    "subtitle": "Wir schätzen Ihr Feedback! Bitte teilen Sie uns Ihre Gedanken mit.",
+    "typeLabel": "Feedback-Typ",
+    "bug": "Fehlerbericht",
+    "suggestion": "Vorschlag",
+    "other": "Sonstiges",
+    "messageLabel": "Ihre Nachricht",
+    "placeholder": "Bitte beschreiben Sie Ihr Feedback detailliert...",
+    "cancel": "Abbrechen",
+    "submit": "Absenden",
+    "submitting": "Wird gesendet...",
+    "thankYou": "Vielen Dank!",
+    "submitted": "Ihr Feedback wurde erfolgreich übermittelt."
   }
 }

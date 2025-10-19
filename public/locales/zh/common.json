@@ -10,6 +10,42 @@
   "contentCreation": {
     "model": "模型",
     "product": "产品类别",
+    "purpose": "用途",
+    "productInformation": "产品信息",
+    "productPlaceholder": "告诉我们您的产品信息...",
+    "hotKeywords": "热门关键词",
+    "realtimeTrends": "实时趋势更新",
+    "hotTitles": "热门标题",
+    "generating": "生成中...",
+    "generate": "生成",
+    "noSensitiveWords": "未发现敏感词",
+    "sensitiveFilter": "敏感词过滤",
+    "publishDate": "发布日期：",
+    "publishing": "发布",
+    "published": "已发布！",
+    "noContentToPublish": "没有内容可发布",
+    "publishError": "发布内容失败，请重试。",
+    "enterProductInfo": "请输入产品信息",
+    "requestTimeout": "请求超时（15秒）- 请重试",
+    "generateError": "生成内容失败 - 请重试",
+    "refreshContent": "刷新当前平台内容",
+    "refreshError": "刷新内容失败 - 请重试",
+    "selectTitleFirst": "请先选择一个标题",
+    "productImages": "产品图片",
+    "uploadImage": "上传图片",
+    "removeImage": "删除图片",
+    "maxImagesLimit": "最多只能上传5张图片",
+    "invalidImageType": "请只上传图片文件",
+    "imageTooLarge": "图片大小不能超过5MB",
+    "onboarding": {
+      "step1": "选择您喜欢的大语言模型",
+      "step2": "您可以输入产品名称或成分",
+      "step3": "这篇文案的用途是什么",
+      "step4": "将您的文案与最新的热门词汇关联",
+      "dontShowAgain": "不再显示",
+      "continue": "继续",
+      "skip": "跳过"
+    },
     "models": {
       "auto": "自动",
       "deepseek": "DeepSeek-V3.1",
@@ -22,6 +58,9 @@
       "motherBaby": "母婴",
       "beauty": "美妆",
       "sportsEquipment": "运动器材"
+    },
+    "purposes": {
+      "ecommerce": "电商推广"
     },
     "platformContent": {
       "clickToGenerate": "点击上方标题生成{{platform}}平台的推广文案"
@@ -36,5 +75,20 @@
     "required": "请输入邮箱地址",
     "invalid": "请输入有效的邮箱地址",
     "error": "保存邮箱失败，请重试。"
+  },
+  "feedback": {
+    "title": "意见反馈",
+    "subtitle": "我们非常重视您的反馈！请与我们分享您的想法。",
+    "typeLabel": "反馈类型",
+    "bug": "问题报告",
+    "suggestion": "建议",
+    "other": "其他",
+    "messageLabel": "您的反馈",
+    "placeholder": "请详细描述您的反馈内容...",
+    "cancel": "取消",
+    "submit": "提交",
+    "submitting": "提交中...",
+    "thankYou": "感谢您！",
+    "submitted": "您的反馈已成功提交。"
   }
 }

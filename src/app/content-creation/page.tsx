@@ -6,10 +6,14 @@ import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import OnboardingTour from '../../components/OnboardingTour'
 
 export default function ContentCreationPage() {
   const router = useRouter()
   const { t, i18n } = useTranslation()
+  
+  // 引导流程状态
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   // 从 localStorage 初始化状态或使用默认值
   const [selectedPlatform, setSelectedPlatform] = useState<'instagram' | 'facebook' | 'x'>(() => {
@@ -39,6 +43,13 @@ export default function ContentCreationPage() {
       return savedKeywords ? JSON.parse(savedKeywords) : []
     }
     return []
+  })
+
+  const [selectedPurpose, setSelectedPurpose] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('selectedPurpose') || ''
+    }
+    return ''
   })
 
   const [isSensitiveFilterEnabled, setIsSensitiveFilterEnabled] = useState(true)
@@ -71,22 +82,34 @@ export default function ContentCreationPage() {
   })
 
   const [isGeneratingPlatformContent, setIsGeneratingPlatformContent] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   
   // 添加生成内容的加载状态
   const [isGenerating, setIsGenerating] = useState(false)
+
+  // 图片上传相关状态
+  const [uploadedImages, setUploadedImages] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const savedImages = localStorage.getItem('uploadedImages')
+      return savedImages ? JSON.parse(savedImages) : []
+    }
+    return []
+  })
 
   // 使用 useEffect 来保存状态到 localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('productInfo', productInfo)
       localStorage.setItem('keywords', JSON.stringify(keywords))
+      localStorage.setItem('selectedPurpose', selectedPurpose)
       localStorage.setItem('generatedContent', JSON.stringify(generatedContent))
       localStorage.setItem('platformContent', JSON.stringify(platformContent))
       localStorage.setItem('selectedTitle', selectedTitle)
       localStorage.setItem('selectedPlatform', selectedPlatform)
       localStorage.setItem('selectedModel', selectedModel)
+      localStorage.setItem('uploadedImages', JSON.stringify(uploadedImages))
     }
-  }, [productInfo, keywords, generatedContent, platformContent, selectedTitle, selectedPlatform, selectedModel])
+  }, [productInfo, keywords, selectedPurpose, generatedContent, platformContent, selectedTitle, selectedPlatform, selectedModel, uploadedImages])
 
   // 添加刷新页面时清除数据的处理
   useEffect(() => {
@@ -94,17 +117,32 @@ export default function ContentCreationPage() {
       // 清除所有存储的数据
       localStorage.removeItem('productInfo')
       localStorage.removeItem('keywords')
+      localStorage.removeItem('selectedPurpose')
       localStorage.removeItem('generatedContent')
       localStorage.removeItem('platformContent')
       localStorage.removeItem('selectedTitle')
       localStorage.removeItem('selectedPlatform')
       localStorage.removeItem('selectedModel')
+      localStorage.removeItem('uploadedImages')
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [])
+  
+  // 检查是否需要显示引导
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hasCompletedOnboarding = localStorage.getItem('onboardingCompleted')
+      if (!hasCompletedOnboarding) {
+        // 延迟显示引导，让页面先渲染
+        setTimeout(() => {
+          setShowOnboarding(true)
+        }, 500)
+      }
     }
   }, [])
   
@@ -140,12 +178,85 @@ export default function ContentCreationPage() {
     'Best Seller'
   ]
 
+  // Purpose 选项 - 使用翻译键
+  const purposeOptions = [
+    'ecommerce'
+  ]
+
+  // 带超时的 fetch 函数
+  const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = 15000) => {
+    const controller = new AbortController()
+    const id = setTimeout(() => controller.abort(), timeout)
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      })
+      clearTimeout(id)
+      return response
+    } catch (error) {
+      clearTimeout(id)
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('Request timeout - please try again')
+      }
+      throw error
+    }
+  }
+
   const handleKeywordClick = (keyword: string) => {
     setKeywords(prev => 
       prev.includes(keyword)
         ? prev.filter(k => k !== keyword)
         : [...prev, keyword]
     )
+  }
+
+  // 图片上传处理函数
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    // 限制最多上传5张图片
+    if (uploadedImages.length + files.length > 5) {
+      alert(t('contentCreation.maxImagesLimit', 'Maximum 5 images allowed'))
+      return
+    }
+
+    Array.from(files).forEach(file => {
+      // 检查文件类型
+      if (!file.type.startsWith('image/')) {
+        alert(t('contentCreation.invalidImageType', 'Please upload image files only'))
+        return
+      }
+
+      // 检查文件大小（限制5MB）
+      if (file.size > 5 * 1024 * 1024) {
+        alert(t('contentCreation.imageTooLarge', 'Image size should not exceed 5MB'))
+        return
+      }
+
+      // 读取文件并转换为 base64
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setUploadedImages(prev => [...prev, event.target!.result as string])
+        }
+      }
+      reader.readAsDataURL(file)
+    })
+
+    // 清空 input 值，允许重复上传同一文件
+    e.target.value = ''
+  }
+
+  // 删除图片
+  const handleRemoveImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handlePurposeClick = (purpose: string) => {
+    setSelectedPurpose(prev => prev === purpose ? '' : purpose)
   }
 
   const generatePlatformContent = async (title: string, platform: 'instagram' | 'facebook' | 'x') => {
@@ -165,7 +276,7 @@ export default function ContentCreationPage() {
           requirements: [
             "第一行展示原标题",
             "从第二行开始是推广文案",
-            "文案长度限制在50-100字之间",
+            "文案长度限制在100-150字之间",
             "使用适当的emoji表情符号增加吸引力",
             "文案要简洁有力，富有吸引力",
             "确保用换行符分隔标题和内容"
@@ -178,7 +289,7 @@ export default function ContentCreationPage() {
           requirements: [
             "Show original title in the first line",
             "Promotional content starts from the second line",
-            "Content length should be between 50-100 characters",
+            "Content length should be between 100-150 characters",
             "Use appropriate emoji to enhance appeal",
             "Content should be concise and engaging",
             "Ensure title and content are separated by line breaks"
@@ -191,7 +302,7 @@ export default function ContentCreationPage() {
           requirements: [
             "Originaltitel in der ersten Zeile anzeigen",
             "Werbeinhalt beginnt ab der zweiten Zeile",
-            "Inhaltslänge sollte zwischen 50-100 Zeichen liegen",
+            "Inhaltslänge sollte zwischen 100-150 Zeichen liegen",
             "Verwenden Sie passende Emojis zur Verbesserung der Attraktivität",
             "Inhalt sollte prägnant und ansprechend sein",
             "Stellen Sie sicher, dass Titel und Inhalt durch Zeilenumbrüche getrennt sind"
@@ -203,7 +314,7 @@ export default function ContentCreationPage() {
 
       const langConfig = requirementsMap[currentLanguage as keyof typeof requirementsMap] || requirementsMap.en;
       
-      const response = await fetch('/api/generate', {
+      const response = await fetchWithTimeout('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -215,9 +326,11 @@ export default function ContentCreationPage() {
 ${langConfig.requirements.map((req, index) => `${index + 1}. ${req}`).join('\n')}
 
 ${langConfig.title}${title}
-${langConfig.productInfo}${productInfo}`
+${langConfig.productInfo}${productInfo}`,
+          images: uploadedImages.length > 0 ? uploadedImages : undefined,  // 如果有图片则发送
+          purpose: selectedPurpose || undefined  // 如果有选中的用途则发送
         })
-      })
+      }, 15000)
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -258,9 +371,138 @@ ${langConfig.productInfo}${productInfo}`
     }
   }
 
+  // 刷新当前平台内容
+  const handleRefreshPlatformContent = async () => {
+    // 检查是否有选中的标题
+    if (!selectedTitle) {
+      alert(t('contentCreation.selectTitleFirst', 'Please select a title first'));
+      return;
+    }
+
+    // 检查是否有产品信息
+    if (!productInfo) {
+      alert(t('contentCreation.enterProductInfo'));
+      return;
+    }
+
+    setIsRefreshing(true);
+    
+    try {
+      // 获取当前语言
+      const currentLanguage = i18n.language;
+      
+      // 根据语言设置提示语和要求
+      const requirementsMap = {
+        zh: {
+          intro: `请用中文根据以下标题为${selectedPlatform}平台创建一个推广文案。要求：`,
+          requirements: [
+            "第一行展示原标题",
+            "从第二行开始是推广文案",
+            "文案长度限制在100-150字之间",
+            "使用适当的emoji表情符号增加吸引力",
+            "文案要简洁有力，富有吸引力",
+            "确保用换行符分隔标题和内容"
+          ],
+          title: "标题：",
+          productInfo: "产品信息：",
+          keywords: "关键词：",
+          purpose: "用途："
+        },
+        en: {
+          intro: `Create promotional content in English for ${selectedPlatform} platform based on the following title. Requirements:`,
+          requirements: [
+            "Show original title in the first line",
+            "Promotional content starts from the second line",
+            "Content length should be between 100-150 characters",
+            "Use appropriate emoji to enhance appeal",
+            "Content should be concise and engaging",
+            "Ensure title and content are separated by line breaks"
+          ],
+          title: "Title:",
+          productInfo: "Product information:",
+          keywords: "Keywords:",
+          purpose: "Purpose:"
+        },
+        de: {
+          intro: `Erstellen Sie Werbeinhalt auf Deutsch für die ${selectedPlatform}-Plattform basierend auf folgendem Titel. Anforderungen:`,
+          requirements: [
+            "Originaltitel in der ersten Zeile anzeigen",
+            "Werbeinhalt beginnt ab der zweiten Zeile",
+            "Inhaltslänge sollte zwischen 100-150 Zeichen liegen",
+            "Verwenden Sie passende Emojis zur Verbesserung der Attraktivität",
+            "Inhalt sollte prägnant und ansprechend sein",
+            "Stellen Sie sicher, dass Titel und Inhalt durch Zeilenumbrüche getrennt sind"
+          ],
+          title: "Titel:",
+          productInfo: "Produktinformationen:",
+          keywords: "Schlüsselwörter:",
+          purpose: "Zweck:"
+        }
+      };
+
+      const langConfig = requirementsMap[currentLanguage as keyof typeof requirementsMap] || requirementsMap.en;
+      
+      // 构建包含所有信息的提示
+      let prompt = `${langConfig.intro}
+${langConfig.requirements.map((req, index) => `${index + 1}. ${req}`).join('\n')}
+
+${langConfig.title}${selectedTitle}
+${langConfig.productInfo}${productInfo}`;
+
+      // 添加关键词信息（如果有）
+      if (keywords.length > 0) {
+        prompt += `\n${langConfig.keywords}${keywords.join(', ')}`;
+      }
+
+      // 添加用途信息（如果有）
+      if (selectedPurpose) {
+        const purposeText = t(`contentCreation.purposes.${selectedPurpose}`);
+        prompt += `\n${langConfig.purpose}${purposeText}`;
+      }
+      
+      const response = await fetchWithTimeout('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: selectedModel,
+          keywords,
+          platform: selectedPlatform,
+          language: currentLanguage,
+          prompt,
+          images: uploadedImages.length > 0 ? uploadedImages : undefined,  // 如果有图片则发送
+          purpose: selectedPurpose || undefined  // 如果有选中的用途则发送
+        })
+      }, 15000);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // 更新缓存（强制刷新）
+      setPlatformContent(prev => ({
+        ...prev,
+        [selectedPlatform]: {
+          ...prev[selectedPlatform],
+          [selectedTitle]: data.content
+        }
+      }));
+    } catch (error) {
+      console.error('Error refreshing platform content:', error);
+      const errorMessage = error instanceof Error && error.message.includes('timeout')
+        ? t('contentCreation.requestTimeout', 'Request timeout - please try again')
+        : t('contentCreation.refreshError', 'Failed to refresh content');
+      
+      alert(errorMessage);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
+
   const handleGenerateContent = async () => {
     if (!productInfo) {
-      alert('Please enter product information')
+      alert(t('contentCreation.enterProductInfo'))
       return
     }
 
@@ -285,16 +527,18 @@ ${langConfig.productInfo}${productInfo}`
         hasError: false
       })
 
-      const response = await fetch('/api/generate', {
+      const response = await fetchWithTimeout('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: selectedModel,  // 让后端处理 auto 的情况
           keywords: keywords,
           prompt: productInfo,
-          sensitiveFilter: isSensitiveFilterEnabled
+          sensitiveFilter: isSensitiveFilterEnabled,
+          images: uploadedImages.length > 0 ? uploadedImages : undefined,  // 如果有图片则发送
+          purpose: selectedPurpose || undefined  // 如果有选中的用途则发送
         })
-      })
+      }, 15000)
       
       const data = await response.json()
       setGeneratedContent({
@@ -303,8 +547,12 @@ ${langConfig.productInfo}${productInfo}`
       })
     } catch (error) {
       console.error('Error generating content:', error)
+      const errorMessage = error instanceof Error && error.message.includes('timeout')
+        ? t('contentCreation.requestTimeout', 'Request timeout - please try again')
+        : t('contentCreation.generateError', 'Failed to generate content')
+      
       setGeneratedContent({
-        content: '',
+        content: errorMessage,
         hasError: true
       })
     } finally {
@@ -318,10 +566,10 @@ ${langConfig.productInfo}${productInfo}`
       <div className="flex-1 min-w-0 p-4 lg:p-6">
         <div className="w-full">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Content Creation</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Content Creator</h1>
             <div className="flex items-center">
               <div className="flex items-center space-x-2 bg-gray-50 px-3 py-1.5 rounded-lg">
-                <span className="text-gray-600 text-sm">Sensitive Word Filter</span>
+                <span className="text-gray-600 text-sm">{t('contentCreation.sensitiveFilter')}</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input 
                     type="checkbox" 
@@ -339,7 +587,7 @@ ${langConfig.productInfo}${productInfo}`
             {/* Left Column: Product Information & Keywords */}
             <div className="space-y-4">
               {/* Model Selection */}
-              <div className="mb-4">
+              <div id="model-select" className="mb-4">
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
@@ -354,19 +602,88 @@ ${langConfig.productInfo}${productInfo}`
               </div>
 
               {/* Product Information */}
-              <div className="bg-white rounded-lg p-5 shadow-sm">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Product Information</h2>
+              <div id="product-info" className="bg-white rounded-lg p-5 shadow-sm">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('contentCreation.productInformation')}</h2>
                 <textarea
                   value={productInfo}
                   onChange={(e) => setProductInfo(e.target.value)}
                   className="w-full p-4 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 h-48"
-                  placeholder="Tell us about your product..."
+                  placeholder={t('contentCreation.productPlaceholder')}
                 />
+                
+                {/* Image Upload Section */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-medium text-gray-700">
+                      {t('contentCreation.productImages', 'Product Images')} 
+                      <span className="text-gray-400 ml-2">({uploadedImages.length}/5)</span>
+                    </label>
+                    <label className="cursor-pointer px-4 py-2 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      {t('contentCreation.uploadImage', 'Upload Image')}
+                    </label>
+                  </div>
+                  
+                  {/* Image Preview Grid */}
+                  {uploadedImages.length > 0 && (
+                    <div className="grid grid-cols-5 gap-3">
+                      {uploadedImages.map((image, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={image}
+                            alt={`Product ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                          />
+                          <button
+                            onClick={() => handleRemoveImage(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            title={t('contentCreation.removeImage', 'Remove image')}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Purpose */}
+              <div id="purpose-section" className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">{t('contentCreation.purpose')}</h2>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {purposeOptions.map((purpose) => (
+                    <button
+                      key={purpose}
+                      onClick={() => handlePurposeClick(purpose)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                        selectedPurpose === purpose
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-orange-50 text-orange-500 hover:bg-orange-100'
+                      }`}
+                    >
+                      {t(`contentCreation.purposes.${purpose}`)}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Hot Keywords */}
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Hot Keywords</h2>
+              <div id="keywords-section" className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">{t('contentCreation.hotKeywords')}</h2>
+                  <p className="text-xs text-gray-500 mt-1">{t('contentCreation.realtimeTrends')}</p>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {hotKeywords.map((keyword) => (
                     <button
@@ -397,24 +714,24 @@ ${langConfig.productInfo}${productInfo}`
                 {isGenerating ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                    Generating...
+                    {t('contentCreation.generating')}
                   </>
                 ) : (
-                  'Generate Content'
+                  t('contentCreation.generate')
                 )}
               </button>
             </div>
 
-            {/* Right Column: Content Preview */}
+            {/* Right Column: Hot Titles */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">Content Preview</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t('contentCreation.hotTitles')}</h2>
                 {!generatedContent.hasError && generatedContent.content && (
                   <div className="flex items-center text-green-500 text-sm">
                     <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                     </svg>
-                    No sensitive words found
+                    {t('contentCreation.noSensitiveWords')}
                   </div>
                 )}
               </div>
@@ -478,7 +795,7 @@ ${langConfig.productInfo}${productInfo}`
 
               {/* Platform Selection */}
               <div className="space-y-2">
-                <div className="flex space-x-2">
+                <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setSelectedPlatform('instagram')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium ${
@@ -509,6 +826,32 @@ ${langConfig.productInfo}${productInfo}`
                   >
                     X
                   </button>
+                  
+                  {/* Refresh Button */}
+                  <button
+                    onClick={handleRefreshPlatformContent}
+                    disabled={isRefreshing || !selectedTitle}
+                    className={`ml-2 p-2 rounded-lg transition-colors ${
+                      isRefreshing || !selectedTitle
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-orange-500'
+                    }`}
+                    title={t('contentCreation.refreshContent', 'Refresh content for current platform')}
+                  >
+                    <svg 
+                      className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`}
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth="2" 
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                      />
+                    </svg>
+                  </button>
                 </div>
 
                   {/* Platform Content Display */}
@@ -527,7 +870,7 @@ ${langConfig.productInfo}${productInfo}`
                       </div>
                       <div className="flex items-center justify-between pt-2">
                         <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-600">Publish date:</span>
+                          <span className="text-sm text-gray-600">{t('contentCreation.publishDate')}</span>
                           <DatePicker
                             selected={publishDate}
                             onChange={(date: Date) => setPublishDate(date)}
@@ -561,7 +904,7 @@ ${langConfig.productInfo}${productInfo}`
                           className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                           onClick={async () => {
                             if (!selectedTitle || !platformContent[selectedPlatform][selectedTitle]) {
-                              alert('No content to publish');
+                              alert(t('contentCreation.noContentToPublish'));
                               return;
                             }
 
@@ -613,7 +956,7 @@ ${langConfig.productInfo}${productInfo}`
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                   </svg>
                                 );
-                                button.textContent = 'Published!';
+                                button.textContent = t('contentCreation.published');
                                 
                                 // 2秒后重置按钮并跳转
                                 setTimeout(() => {
@@ -622,14 +965,14 @@ ${langConfig.productInfo}${productInfo}`
                               }
                             } catch (error) {
                               console.error('Error publishing content:', error);
-                              alert('Failed to publish content. Please try again.');
+                              alert(t('contentCreation.publishError'));
                             }
                           }}
                         >
                           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                           </svg>
-                          Publishing
+                          {t('contentCreation.publishing')}
                         </button>
                       </div>
                     </div>
@@ -646,6 +989,11 @@ ${langConfig.productInfo}${productInfo}`
           </div>
         </div>
       </div>
+      
+      {/* 引导流程 */}
+      {showOnboarding && (
+        <OnboardingTour onComplete={() => setShowOnboarding(false)} />
+      )}
     </MainLayout>
   )
 }
