@@ -60,7 +60,11 @@
       "sportsEquipment": "Sportausrüstung"
     },
     "purposes": {
-      "ecommerce": "E-Commerce-Werbung"
+      "awareness": "Bewusstseinsbildung",
+      "engagement": "Engagement",
+      "sales": "Verkauf",
+      "education": "Bildung",
+      "community": "Gemeinschaft"
     },
     "platformContent": {
       "clickToGenerate": "Klicken Sie oben auf den Titel, um {{platform}}-Werbeinhalte zu generieren"

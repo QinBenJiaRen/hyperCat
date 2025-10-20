@@ -180,7 +180,11 @@ export default function ContentCreationPage() {
 
   // Purpose 选项 - 使用翻译键
   const purposeOptions = [
-    'ecommerce'
+    'awareness',
+    'engagement', 
+    'sales',
+    'education',
+    'community'
   ]
 
   // 带超时的 fetch 函数

@@ -236,6 +236,13 @@ export default function MainLayout({ children }: LayoutProps) {
     }
     return false
   })
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return parseInt(localStorage.getItem('sidebarWidth') || '240')
+    }
+    return 240
+  })
+  const [isResizing, setIsResizing] = useState(false)
 
   useEffect(() => {
     // Load email from localStorage
@@ -252,6 +259,13 @@ export default function MainLayout({ children }: LayoutProps) {
     }
   }, [isSidebarCollapsed])
 
+  // 保存侧边栏宽度到 localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebarWidth', String(sidebarWidth))
+    }
+  }, [sidebarWidth])
+
   // 保存主题状态到 localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -265,12 +279,58 @@ export default function MainLayout({ children }: LayoutProps) {
     }
   }, [isDarkMode])
 
+  // 拖拽处理函数
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isSidebarCollapsed) return
+    setIsResizing(true)
+    e.preventDefault()
+  }
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isResizing) return
+    const newWidth = Math.max(200, Math.min(400, e.clientX))
+    setSidebarWidth(newWidth)
+  }
+
+  const handleMouseUp = () => {
+    setIsResizing(false)
+  }
+
+  // 添加全局鼠标事件监听
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = 'col-resize'
+      document.body.style.userSelect = 'none'
+    } else {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+  }, [isResizing])
+
   return (
     <div className={`flex h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} transition-colors duration-300`}>
       {/* Sidebar */}
-      <div className={`${isSidebarCollapsed ? 'w-20' : 'w-60'} ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r flex flex-col h-full transition-all duration-300 ease-in-out`}>
+      <div 
+        className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r flex flex-col h-full transition-all duration-300 ease-in-out overflow-hidden relative`}
+        style={{ 
+          width: isSidebarCollapsed ? '80px' : `${sidebarWidth}px`,
+          minWidth: isSidebarCollapsed ? '80px' : '200px',
+          maxWidth: isSidebarCollapsed ? '80px' : '400px'
+        }}
+      >
         {/* Main Navigation Section */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 overflow-y-auto">
           <div className="flex items-center justify-between mb-6 relative">
             <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center w-full pr-6' : ''}`}>
               <button
@@ -517,8 +577,8 @@ export default function MainLayout({ children }: LayoutProps) {
         </div>
 
         {/* User Profile - Fixed at Bottom */}
-        <div className={`${isDarkMode ? 'border-gray-700' : 'border-gray-100'} border-t transition-colors`}>
-          <div className={`p-4 transition-all ${isSidebarCollapsed ? 'flex justify-center' : ''}`}>
+        <div className={`${isDarkMode ? 'border-gray-700' : 'border-gray-100'} border-t py-4 px-6 transition-colors min-h-[4.5rem]`}>
+          <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : ''} transition-all h-full`}>
             <button
               onClick={() => setIsProfileOpen(true)}
               className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
@@ -533,6 +593,17 @@ export default function MainLayout({ children }: LayoutProps) {
             </button>
           </div>
         </div>
+
+        {/* Resize Handle */}
+        {!isSidebarCollapsed && (
+          <div
+            className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-orange-500 transition-colors ${
+              isResizing ? 'bg-orange-500' : 'bg-transparent'
+            }`}
+            onMouseDown={handleMouseDown}
+            title="Drag to resize sidebar"
+          />
+        )}
       </div>
 
       {/* Main Content */}
@@ -573,7 +644,7 @@ export default function MainLayout({ children }: LayoutProps) {
         </div>
 
         {/* Footer */}
-        <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t py-4 px-6 transition-colors`}>
+        <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t py-4 px-6 transition-colors min-h-[4.5rem]`}>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Footer Links */}
             <div className={`flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -592,6 +663,8 @@ export default function MainLayout({ children }: LayoutProps) {
               <a href="#" className="hover:text-orange-500 transition-colors">Status</a>
               <span className={isDarkMode ? 'text-gray-600' : 'text-gray-300'}>|</span>
               <a href="#" className="hover:text-orange-500 transition-colors">Support</a>
+              <span className={isDarkMode ? 'text-gray-600' : 'text-gray-300'}>|</span>
+              <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>HushFlock @2025 All Copyright Reserved</span>
             </div>
 
             {/* Theme Toggle */}

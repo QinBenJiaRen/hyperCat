@@ -26,7 +26,7 @@ Content-Type: application/json
   platform?: string,          // 平台名称：'instagram', 'facebook', 'x'（仅在生成平台内容时存在）
   language?: string,          // 语言：'zh', 'en', 'de'（仅在生成平台内容时存在）
   images?: string[],          // 产品图片数组（base64格式），可选
-  purpose?: string,           // 【新增】用途标签（如 'ecommerce'），可选
+  purpose?: string,           // 【新增】用途标签（如 'awareness', 'engagement', 'sales', 'education', 'community'），可选
 }
 ```
 
@@ -62,25 +62,52 @@ data:[MIME类型];base64,[图片数据]
 
 #### 格式
 - **类型**：`string`
-- **可选值**：`'ecommerce'`（更多用途可能在未来添加）
-- **示例**：`"ecommerce"`
+- **可选值**：`'awareness'`, `'engagement'`, `'sales'`, `'education'`, `'community'`
+- **示例**：`"awareness"`
 
 #### 何时存在
 - 当 `purpose` 字段存在时，表示用户选择了特定的内容用途
 - 当 `purpose` 为 `undefined` 时，表示用户未选择任何用途标签
 
 #### 用途说明
-- **ecommerce**：电商推广 / E-commerce Promotion / E-Commerce-Werbung
-  - 表示生成的内容用于电商平台的产品推广
-  - 后端可以据此优化生成策略，如添加购买引导、促销话术等
+- **awareness**：提升品牌 / Awareness / Bewusstseinsbildung
+  - 表示生成的内容用于提升品牌知名度和认知度
+- **engagement**：诱发互动 / Engagement / Engagement  
+  - 表示生成的内容用于增加用户互动和参与度
+- **sales**：促销活动 / Sales / Verkauf
+  - 表示生成的内容用于促销和销售转化
+- **education**：说明教学 / Education / Bildung
+  - 表示生成的内容用于教育和知识传播
+- **community**：评论社区 / Community / Gemeinschaft
+  - 表示生成的内容用于社区建设和用户交流
 
 #### 多语言映射
 ```typescript
 const purposeTranslations = {
-  ecommerce: {
-    zh: "电商推广",
-    en: "E-commerce Promotion",
-    de: "E-Commerce-Werbung"
+  awareness: {
+    zh: "提升品牌",
+    en: "Awareness", 
+    de: "Bewusstseinsbildung"
+  },
+  engagement: {
+    zh: "诱发互动",
+    en: "Engagement",
+    de: "Engagement"
+  },
+  sales: {
+    zh: "促销活动", 
+    en: "Sales",
+    de: "Verkauf"
+  },
+  education: {
+    zh: "说明教学",
+    en: "Education",
+    de: "Bildung"
+  },
+  community: {
+    zh: "评论社区",
+    en: "Community", 
+    de: "Gemeinschaft"
   }
 }
 ```
@@ -98,7 +125,7 @@ if (request.images && request.images.length > 0) {
 // 检查用途
 if (request.purpose) {
   // 用户选择了特定用途，可以据此优化提示词
-  // 例如：'ecommerce' 可以添加促销、购买引导等话术
+  // 例如：'sales' 可以添加促销、购买引导等话术，'engagement' 可以添加互动引导等
 }
 ```
 
@@ -182,8 +209,16 @@ export async function POST(request: Request) {
   
   // 根据用途优化提示词
   let enhancedPrompt = prompt
-  if (purpose === 'ecommerce') {
-    enhancedPrompt = `${prompt}\n\n请注意：这是用于电商推广的内容，需要包含吸引购买的元素。`
+  if (purpose === 'awareness') {
+    enhancedPrompt = `${prompt}\n\n请注意：这是用于提升品牌认知的内容，需要突出品牌特色和价值。`
+  } else if (purpose === 'engagement') {
+    enhancedPrompt = `${prompt}\n\n请注意：这是用于增加互动的内容，需要包含吸引用户参与的元素。`
+  } else if (purpose === 'sales') {
+    enhancedPrompt = `${prompt}\n\n请注意：这是用于促销的内容，需要包含吸引购买的元素。`
+  } else if (purpose === 'education') {
+    enhancedPrompt = `${prompt}\n\n请注意：这是用于教育说明的内容，需要清晰易懂，富有教育性。`
+  } else if (purpose === 'community') {
+    enhancedPrompt = `${prompt}\n\n请注意：这是用于社区建设的内容，需要促进用户交流和讨论。`
   }
   
   // 构建消息内容
@@ -236,7 +271,7 @@ export async function POST(request: Request) {
 ### 1. 生成标题（Generate 按钮）
 - **接口调用**：点击 "Generate" 按钮
 - **图片用途**：大模型分析产品图片，生成更准确的标题
-- **用途用途**：根据选择的用途（如电商推广）优化标题风格
+- **用途用途**：根据选择的用途（如品牌提升、互动增加等）优化标题风格
 - **请求示例**：
 ```json
 {
@@ -245,7 +280,7 @@ export async function POST(request: Request) {
   "prompt": "这是一款运动鞋...",
   "sensitiveFilter": true,
   "images": ["data:image/jpeg;base64,...", "data:image/png;base64,..."],
-  "purpose": "ecommerce"
+  "purpose": "sales"
 }
 ```
 
@@ -262,7 +297,7 @@ export async function POST(request: Request) {
   "language": "zh",
   "prompt": "请用中文根据以下标题为instagram平台创建一个推广文案...",
   "images": ["data:image/jpeg;base64,..."],
-  "purpose": "ecommerce"
+  "purpose": "engagement"
 }
 ```
 
@@ -279,7 +314,7 @@ export async function POST(request: Request) {
   "language": "en",
   "prompt": "Create promotional content...",
   "images": ["data:image/jpeg;base64,...", "data:image/png;base64,..."],
-  "purpose": "ecommerce"
+  "purpose": "awareness"
 }
 ```
 
