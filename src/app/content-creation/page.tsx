@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import OnboardingTour from '../../components/OnboardingTour'
+import SocialMediaPublisher from '../../components/SocialMediaPublisher'
 
 export default function ContentCreationPage() {
   const router = useRouter()
@@ -868,7 +869,7 @@ ${langConfig.productInfo}${productInfo}`;
                       <div className="prose max-w-none text-gray-700 leading-relaxed">
                         {platformContent[selectedPlatform][selectedTitle].split('\n').slice(1).join('\n')}
                       </div>
-                      <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center justify-between pt-4 border-t mt-4">
                         <div className="flex items-center space-x-2">
                           <span className="text-sm text-gray-600">{t('contentCreation.publishDate')}</span>
                           <DatePicker
@@ -879,29 +880,10 @@ ${langConfig.productInfo}${productInfo}`;
                             minDate={new Date()}
                           />
                         </div>
-                          <style jsx>{`
-                            @keyframes checkmark {
-                              0% {
-                                stroke-dashoffset: 24;
-                              }
-                              100% {
-                                stroke-dashoffset: 0;
-                              }
-                            }
-                            
-                            .success {
-                              background-color: #22c55e !important;
-                              pointer-events: none;
-                            }
-                            
-                            .success svg {
-                              animation: checkmark 0.3s ease-in-out forwards;
-                              stroke-dasharray: 24;
-                              stroke-dashoffset: 24;
-                            }
-                          `}</style>
-                          <button
-                          className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                        
+                        {/* Publishing Later 按钮 */}
+                        <button
+                          className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
                           onClick={async () => {
                             if (!selectedTitle || !platformContent[selectedPlatform][selectedTitle]) {
                               alert(t('contentCreation.noContentToPublish'));
@@ -951,12 +933,7 @@ ${langConfig.productInfo}${productInfo}`;
                               if (button) {
                                 button.classList.add('success');
                                 button.disabled = true;
-                                const successIcon = (
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                );
-                                button.textContent = t('contentCreation.published');
+                                button.textContent = t('contentCreation.publishedLater');
                                 
                                 // 2秒后重置按钮并跳转
                                 setTimeout(() => {
@@ -964,17 +941,38 @@ ${langConfig.productInfo}${productInfo}`;
                                 }, 2000);
                               }
                             } catch (error) {
-                              console.error('Error publishing content:', error);
+                              console.error('Error scheduling content:', error);
                               alert(t('contentCreation.publishError'));
                             }
                           }}
                         >
                           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          {t('contentCreation.publishing')}
+                          {t('contentCreation.publishingLater')}
                         </button>
                       </div>
+                      
+                      {/* Publish Now 按钮区域 */}
+                      <div className="mt-4">
+                        <SocialMediaPublisher
+                          platform={selectedPlatform}
+                          content={platformContent[selectedPlatform][selectedTitle]}
+                          onPublishSuccess={() => {
+                            alert(t('contentCreation.publishedNow'));
+                          }}
+                          onPublishError={(error) => {
+                            alert(error);
+                          }}
+                        />
+                      </div>
+                      
+                      <style jsx>{`
+                        .success {
+                          background-color: #22c55e !important;
+                          pointer-events: none;
+                        }
+                      `}</style>
                     </div>
                   ) : (
                     <div className="text-gray-500 text-center py-4">

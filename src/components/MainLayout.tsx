@@ -4,6 +4,7 @@ import { ReactNode, useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import i18nInstance from './I18nextProvider'
+import { useAuth } from '../contexts/AuthContext'
 
 interface LayoutProps {
   children: ReactNode
@@ -177,12 +178,16 @@ function FeedbackModal({ isOpen, onClose, isDarkMode }: FeedbackModalProps) {
 
 interface UserProfileModalProps {
   email: string
+  fullName?: string
   isOpen: boolean
   onClose: () => void
+  onSignOut: () => void
   isDarkMode: boolean
 }
 
-function UserProfileModal({ email, isOpen, onClose, isDarkMode }: UserProfileModalProps) {
+function UserProfileModal({ email, fullName, isOpen, onClose, onSignOut, isDarkMode }: UserProfileModalProps) {
+  const { t } = useTranslation()
+  
   if (!isOpen) return null
 
   return (
@@ -205,12 +210,26 @@ function UserProfileModal({ email, isOpen, onClose, isDarkMode }: UserProfileMod
           </div>
           
           <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'} mb-2`}>
-            User Profile
+            {fullName || 'User Profile'}
           </h3>
           
           <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-4 mb-4`}>
+            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mb-1`}>Email</p>
             <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} break-all`}>{email}</p>
           </div>
+          
+          <button
+            onClick={() => {
+              onSignOut()
+              onClose()
+            }}
+            className="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            {t('auth.signOut', 'Sign Out')}
+          </button>
         </div>
       </div>
     </div>
@@ -221,9 +240,9 @@ export default function MainLayout({ children }: LayoutProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { t } = useTranslation()
+  const { user, signOut } = useAuth()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
-  const [userEmail, setUserEmail] = useState('')
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('darkMode') === 'true'
@@ -236,14 +255,6 @@ export default function MainLayout({ children }: LayoutProps) {
     }
     return false
   })
-
-  useEffect(() => {
-    // Load email from localStorage
-    const savedEmail = localStorage.getItem('userEmail')
-    if (savedEmail) {
-      setUserEmail(savedEmail)
-    }
-  }, [])
 
   // 保存侧边栏状态到 localStorage
   useEffect(() => {
@@ -626,9 +637,11 @@ export default function MainLayout({ children }: LayoutProps) {
 
       {/* Profile Modal */}
       <UserProfileModal
-        email={userEmail}
+        email={user?.email || ''}
+        fullName={user?.user_metadata?.full_name}
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+        onSignOut={signOut}
         isDarkMode={isDarkMode}
       />
 

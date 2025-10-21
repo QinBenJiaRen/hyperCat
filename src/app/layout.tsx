@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { I18nextProviderClient } from '@/components/I18nextProvider'
 import EmailCheck from '@/components/EmailCheck'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,11 +20,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <I18nextProviderClient>
-          <EmailCheck>
-            {children}
-          </EmailCheck>
-        </I18nextProviderClient>
+        <AuthProvider>
+          <I18nextProviderClient>
+            <EmailCheck>
+              {children}
+            </EmailCheck>
+          </I18nextProviderClient>
+        </AuthProvider>
       </body>
     </html>
   )
