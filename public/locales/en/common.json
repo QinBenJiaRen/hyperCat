@@ -71,7 +71,11 @@
       "sportsEquipment": "Sports Equipment"
     },
     "purposes": {
-      "ecommerce": "E-commerce Promotion"
+      "awareness": "Awareness",
+      "engagement": "Engagement", 
+      "sales": "Sales",
+      "education": "Education",
+      "community": "Community"
     },
     "platformContent": {
       "clickToGenerate": "Click the title above to generate {{platform}} promotional content"

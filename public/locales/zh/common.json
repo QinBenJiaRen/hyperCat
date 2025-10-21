@@ -71,7 +71,11 @@
       "sportsEquipment": "运动器材"
     },
     "purposes": {
-      "ecommerce": "电商推广"
+      "awareness": "提升品牌",
+      "engagement": "诱发互动",
+      "sales": "促销活动", 
+      "education": "说明教学",
+      "community": "评论社区"
     },
     "platformContent": {
       "clickToGenerate": "点击上方标题生成{{platform}}平台的推广文案"

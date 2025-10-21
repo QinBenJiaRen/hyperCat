@@ -8,6 +8,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import OnboardingTour from '../../components/OnboardingTour'
 import SocialMediaPublisher from '../../components/SocialMediaPublisher'
+import { supabase } from '../../lib/supabase'
 
 export default function ContentCreationPage() {
   const router = useRouter()
@@ -54,6 +55,10 @@ export default function ContentCreationPage() {
   })
 
   const [isSensitiveFilterEnabled, setIsSensitiveFilterEnabled] = useState(true)
+
+  // 热词状态
+  const [hotKeywords, setHotKeywords] = useState<string[]>([])
+  const [isLoadingKeywords, setIsLoadingKeywords] = useState(false)
 
   const [generatedContent, setGeneratedContent] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -147,6 +152,11 @@ export default function ContentCreationPage() {
     }
   }, [])
   
+  // 获取热词数据
+  useEffect(() => {
+    fetchHotKeywords()
+  }, [i18n.language])
+  
   // 添加发布日期状态
   const [publishDate, setPublishDate] = useState<Date>(new Date())
 
@@ -167,22 +177,55 @@ export default function ContentCreationPage() {
     }
   }, [selectedPlatform, selectedModel, productInfo, keywords, generatedContent, platformContent, selectedTitle])
 
-  // 预设的热门关键词
-  const hotKeywords = [
-    'Summer Sale',
-    'New Arrival',
-    'Limited Offer',
-    'Trending Now',
-    'Flash Deal',
-    'Exclusive',
-    'Hot Item',
-    'Best Seller'
-  ]
-
   // Purpose 选项 - 使用翻译键
   const purposeOptions = [
-    'ecommerce'
+    'awareness',
+    'engagement', 
+    'sales',
+    'education',
+    'community'
   ]
+
+  // 获取热词的函数
+  const fetchHotKeywords = async () => {
+    setIsLoadingKeywords(true)
+    try {
+      // 根据语言映射地区
+      const currentLanguage = i18n.language
+      let area = 'united_states' // 默认地区
+      if (currentLanguage === 'zh') {
+        area = 'china'
+      } else if (currentLanguage === 'de') {
+        area = 'europe'
+      }
+
+      const { data, error } = await supabase
+        .from('worldHotKeys')
+        .select('hotKeys')
+        .eq('area', area)
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      if (error) {
+        console.error('Error fetching hot keywords:', error)
+        setHotKeywords(['Summer Sale', 'New Arrival', 'Limited Offer', 'Trending Now', 'Flash Deal'])
+        return;
+      }
+      if (!data || data.length === 0) {
+        setHotKeywords(['Summer Sale', 'New Arrival', 'Limited Offer'])
+        return;
+      }
+      // 直接将每条的 hotKeys 作为一个热词，去重、过滤空值
+      const keywords = data.map(item => (typeof item.hotKeys === 'string' ? item.hotKeys.trim() : '')).filter(Boolean)
+      const uniqueKeywords = [...new Set(keywords)].slice(0, 10)
+      setHotKeywords(uniqueKeywords.length > 0 ? uniqueKeywords : ['Summer Sale', 'New Arrival', 'Limited Offer'])
+    } catch (error) {
+      console.error('Error fetching hot keywords:', error)
+      setHotKeywords(['Summer Sale', 'New Arrival', 'Limited Offer', 'Trending Now', 'Flash Deal'])
+    } finally {
+      setIsLoadingKeywords(false)
+    }
+  }
 
   // 带超时的 fetch 函数
   const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeout = 15000) => {
@@ -686,19 +729,30 @@ ${langConfig.productInfo}${productInfo}`;
                   <p className="text-xs text-gray-500 mt-1">{t('contentCreation.realtimeTrends')}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {hotKeywords.map((keyword) => (
-                    <button
-                      key={keyword}
-                      onClick={() => handleKeywordClick(keyword)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                        keywords.includes(keyword)
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-orange-50 text-orange-500 hover:bg-orange-100'
-                      }`}
-                    >
-                      {keyword}
-                    </button>
-                  ))}
+                  {isLoadingKeywords ? (
+                    <div className="flex items-center justify-center w-full py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                      <span className="ml-2 text-sm text-gray-500">Loading keywords...</span>
+                    </div>
+                  ) : hotKeywords.length > 0 ? (
+                    hotKeywords.map((keyword, index) => (
+                      <button
+                        key={`${keyword}-${index}`}
+                        onClick={() => handleKeywordClick(keyword)}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                          keywords.includes(keyword)
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-orange-50 text-orange-500 hover:bg-orange-100'
+                        }`}
+                      >
+                        {keyword}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="text-sm text-gray-500 py-2">
+                      No keywords available
+                    </div>
+                  )}
                 </div>
               </div>
 
