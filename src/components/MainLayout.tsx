@@ -392,20 +392,7 @@ export default function MainLayout({ children }: LayoutProps) {
           {/* Navigation Items */}
           <nav className="flex flex-col space-y-3">
             <button
-              onClick={async () => {
-                const emailCheck = document.createElement('div');
-                emailCheck.dataset.checkEmail = 'true';
-                document.body.appendChild(emailCheck);
-                
-                const event = new CustomEvent('checkEmail', {
-                  detail: {
-                    onComplete: () => {
-                      router.push('/content-creation');
-                    }
-                  }
-                });
-                document.dispatchEvent(event);
-              }}
+              onClick={() => router.push('/content-creation')}
               className={`group relative flex items-center w-full py-3 text-sm rounded-lg whitespace-nowrap text-left transition-all
                 ${pathname === '/content-creation'
                   ? 'text-orange-500 bg-orange-50 font-medium'
@@ -424,20 +411,7 @@ export default function MainLayout({ children }: LayoutProps) {
             </button>
 
             <button
-              onClick={async () => {
-                const emailCheck = document.createElement('div');
-                emailCheck.dataset.checkEmail = 'true';
-                document.body.appendChild(emailCheck);
-                
-                const event = new CustomEvent('checkEmail', {
-                  detail: {
-                    onComplete: () => {
-                      router.push('/content-calender');
-                    }
-                  }
-                });
-                document.dispatchEvent(event);
-              }}
+              onClick={() => router.push('/content-calender')}
               className={`group relative flex items-center w-full py-3 text-sm rounded-lg whitespace-nowrap text-left transition-all
                 ${pathname === '/content-calender'
                   ? 'text-orange-500 bg-orange-50 font-medium'
@@ -456,20 +430,7 @@ export default function MainLayout({ children }: LayoutProps) {
             </button>
 
             <button
-              onClick={async () => {
-                const emailCheck = document.createElement('div');
-                emailCheck.dataset.checkEmail = 'true';
-                document.body.appendChild(emailCheck);
-                
-                const event = new CustomEvent('checkEmail', {
-                  detail: {
-                    onComplete: () => {
-                      router.push('/publishing');
-                    }
-                  }
-                });
-                document.dispatchEvent(event);
-              }}
+              onClick={() => router.push('/publishing')}
               className={`group relative flex items-center w-full py-3 text-sm rounded-lg whitespace-nowrap text-left transition-all
                 ${pathname === '/publishing'
                   ? 'text-orange-500 bg-orange-50 font-medium'
@@ -489,20 +450,7 @@ export default function MainLayout({ children }: LayoutProps) {
 
             {/* Analytics - Hidden */}
             {/* <button
-              onClick={async () => {
-                const emailCheck = document.createElement('div');
-                emailCheck.dataset.checkEmail = 'true';
-                document.body.appendChild(emailCheck);
-                
-                const event = new CustomEvent('checkEmail', {
-                  detail: {
-                    onComplete: () => {
-                      router.push('/analytics');
-                    }
-                  }
-                });
-                document.dispatchEvent(event);
-              }}
+              onClick={() => router.push('/analytics')}
               className={`group relative flex items-center w-full py-3 text-sm rounded-lg whitespace-nowrap text-left transition-all
                 ${pathname === '/analytics'
                   ? 'text-orange-500 bg-orange-50 font-medium'
@@ -521,20 +469,7 @@ export default function MainLayout({ children }: LayoutProps) {
             </button> */}
 
             <button
-              onClick={async () => {
-                const emailCheck = document.createElement('div');
-                emailCheck.dataset.checkEmail = 'true';
-                document.body.appendChild(emailCheck);
-                
-                const event = new CustomEvent('checkEmail', {
-                  detail: {
-                    onComplete: () => {
-                      router.push('/membership');
-                    }
-                  }
-                });
-                document.dispatchEvent(event);
-              }}
+              onClick={() => router.push('/membership')}
               className={`group relative flex items-center w-full py-3 text-sm rounded-lg whitespace-nowrap text-left transition-all
                 ${pathname === '/membership'
                   ? 'text-orange-500 bg-orange-50 font-medium'
@@ -553,20 +488,7 @@ export default function MainLayout({ children }: LayoutProps) {
             </button>
 
             <button
-              onClick={async () => {
-                const emailCheck = document.createElement('div');
-                emailCheck.dataset.checkEmail = 'true';
-                document.body.appendChild(emailCheck);
-                
-                const event = new CustomEvent('checkEmail', {
-                  detail: {
-                    onComplete: () => {
-                      router.push('/settings');
-                    }
-                  }
-                });
-                document.dispatchEvent(event);
-              }}
+              onClick={() => router.push('/settings')}
               className={`group relative flex items-center w-full py-3 text-sm rounded-lg whitespace-nowrap text-left transition-all
                 ${pathname === '/settings'
                   ? 'text-orange-500 bg-orange-50 font-medium'

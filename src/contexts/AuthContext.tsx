@@ -11,6 +11,7 @@ interface AuthContextType {
   loading: boolean
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>
   signIn: (email: string, password: string) => Promise<{ error: any }>
+  signInWithOAuth: (provider: 'google' | 'apple' | 'facebook' | 'twitter') => Promise<{ error: any }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: any }>
 }
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signUp: async () => ({ error: null }),
   signIn: async () => ({ error: null }),
+  signInWithOAuth: async () => ({ error: null }),
   signOut: async () => {},
   resetPassword: async () => ({ error: null }),
 })
@@ -94,6 +96,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const signInWithOAuth = async (provider: 'google' | 'apple' | 'facebook' | 'twitter') => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: false,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        },
+      })
+      
+      if (error) throw error
+      
+      return { error: null }
+    } catch (error: any) {
+      return { error }
+    }
+  }
+
   const signOut = async () => {
     await supabase.auth.signOut()
     router.push('/login')
@@ -119,6 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signUp,
     signIn,
+    signInWithOAuth,
     signOut,
     resetPassword,
   }

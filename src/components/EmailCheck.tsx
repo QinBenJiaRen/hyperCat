@@ -1,17 +1,24 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import EmailModal from '@/components/EmailModal';
 import { supabase } from '@/lib/supabase';
 
 export default function EmailCheck({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [showModal, setShowModal] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const [pendingCallback, setPendingCallback] = useState<(() => void) | null>(null);
 
   useEffect(() => {
+    // 如果在登录页、注册页或OAuth回调页，直接跳过检查
+    if (pathname === '/login' || pathname === '/signup' || pathname.startsWith('/auth/callback')) {
+      setIsChecking(false);
+      return;
+    }
+
     const initialCheck = async () => {
       const emailExists = await checkEmail();
       if (!emailExists) {
@@ -47,7 +54,7 @@ export default function EmailCheck({ children }: { children: React.ReactNode }) 
     return () => {
       document.removeEventListener('checkEmail', handleEmailCheck);
     };
-  }, []);
+  }, [pathname]);
 
   const checkEmail = async (): Promise<boolean> => {
     try {

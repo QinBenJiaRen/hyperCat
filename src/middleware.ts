@@ -10,6 +10,11 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
+  // OAuth回调路由，直接放行不做任何处理
+  if (req.nextUrl.pathname.startsWith('/auth/callback')) {
+    return res
+  }
+
   // 公开路由（不需要认证）
   const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password', '/debug-auth']
   const isPublicRoute = publicRoutes.some(route => req.nextUrl.pathname.startsWith(route))
