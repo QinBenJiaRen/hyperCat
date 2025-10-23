@@ -1,33 +1,36 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { useEffect, useState, useRef } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { createBrowserClient } from '@supabase/ssr'
 
 export default function AuthCallback() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [status, setStatus] = useState('处理中...')
   const [error, setError] = useState('')
-  const [hasRedirected, setHasRedirected] = useState(false)
+  const [countdown, setCountdown] = useState(3)
+  const hasProcessed = useRef(false)
+
+  // 使用 SSR 客户端，自动处理 cookies
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   useEffect(() => {
-    if (hasRedirected) {
-      console.log('⚠️ Already redirected, skipping...')
+    // 使用 ref 防止 React Strict Mode 导致的重复执行
+    if (hasProcessed.current) {
       return
     }
 
     const handleCallback = async () => {
       try {
+        hasProcessed.current = true // 立即标记为已处理
         const next = '/content-creation'
-        
-        console.log('=== Auth Callback Page ===')
-        console.log('Full URL:', window.location.href)
-        console.log('Hash:', window.location.hash)
         
         // 让Supabase自动处理URL中的session（hash或query参数）
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-        
-        console.log('Current session:', sessionData.session?.user?.email || 'No session')
         
         if (sessionError) {
           console.error('Session error:', sessionError)
@@ -35,35 +38,20 @@ export default function AuthCallback() {
         
         // 如果已经有session，说明Supabase已经自动处理了OAuth回调
         if (sessionData.session) {
-          console.log('✅ Session exists, proceeding with redirect')
           setStatus(`登录成功! 用户: ${sessionData.session.user.email}`)
           
           // 保存邮箱到localStorage
           localStorage.setItem('userEmail', sessionData.session.user.email)
-          console.log('✅ Email saved to localStorage:', sessionData.session.user.email)
           
-          // 立即跳转
-          console.log('🚀 Attempting redirect to:', next)
-          setHasRedirected(true)
-          setStatus('🚀 正在跳转到首页...')
-          
-          // 直接跳转，不使用任何延迟
-          console.log('🔄 Executing redirect NOW...')
-          console.log('🔄 Target URL:', next)
-          
-          // 使用 setTimeout(0) 确保状态更新后再跳转
+          // 2秒后跳转
           setTimeout(() => {
-            console.log('🔄 Inside setTimeout, about to redirect')
-            window.location.href = next
-            console.log('⚠️ This line should not appear')
-          }, 100)
+            window.location.replace(next)
+          }, 2000)
           
           return
         }
         
         // 如果没有session，尝试手动处理
-        console.log('No session found, trying manual processing...')
-        
         // 检查URL hash中的token（隐式流）
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
@@ -71,9 +59,6 @@ export default function AuthCallback() {
         
         // 检查查询参数中的code（PKCE流）
         const code = searchParams.get('code')
-        
-        console.log('Access Token:', accessToken ? '存在' : '不存在')
-        console.log('Code:', code ? '存在' : '不存在')
         
         if (accessToken && refreshToken) {
           // 处理隐式流的token
@@ -92,19 +77,15 @@ export default function AuthCallback() {
             return
           }
 
-          console.log('Session created:', data.session?.user?.email)
           setStatus(`登录成功! 用户: ${data.session?.user?.email}`)
           
           // 保存邮箱到localStorage，避免弹框
           if (data.session?.user?.email) {
             localStorage.setItem('userEmail', data.session.user.email)
-            console.log('✅ Email saved to localStorage:', data.session.user.email)
-            console.log('✅ Verify localStorage:', localStorage.getItem('userEmail'))
           }
           
-          // 使用window.location.href进行完整页面跳转，确保middleware能获取到新的session
+          // 跳转
           setTimeout(() => {
-            console.log('Redirecting to:', next)
             window.location.href = next
           }, 1000)
         } else if (code) {
@@ -121,19 +102,15 @@ export default function AuthCallback() {
             return
           }
 
-          console.log('Session created:', data.session?.user?.email)
           setStatus(`登录成功! 用户: ${data.session?.user?.email}`)
           
           // 保存邮箱到localStorage，避免弹框
           if (data.session?.user?.email) {
             localStorage.setItem('userEmail', data.session.user.email)
-            console.log('✅ Email saved to localStorage:', data.session.user.email)
-            console.log('✅ Verify localStorage:', localStorage.getItem('userEmail'))
           }
           
-          // 使用window.location.href进行完整页面跳转，确保middleware能获取到新的session
+          // 跳转
           setTimeout(() => {
-            console.log('Redirecting to:', next)
             window.location.href = next
           }, 1000)
         } else {
@@ -150,7 +127,7 @@ export default function AuthCallback() {
     }
 
     handleCallback()
-  }, [searchParams, hasRedirected])
+  }, [searchParams])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -166,6 +143,19 @@ export default function AuthCallback() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">OAuth 登录处理</h2>
           
           <p className="text-lg text-gray-700 mb-4">{status}</p>
+          
+          {/* 始终显示手动跳转按钮，以防自动跳转失败 */}
+          {status.includes('登录成功') && (
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-700 mb-3">如果没有自动跳转，请点击下方按钮：</p>
+              <a 
+                href="/content-creation" 
+                className="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
+              >
+                立即进入内容创建页面 →
+              </a>
+            </div>
+          )}
           
           {error && (
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
