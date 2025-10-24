@@ -1,3 +1,6 @@
+// Social Media Publishing API
+// Fixed syntax issues - 2025-10-24
+
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
