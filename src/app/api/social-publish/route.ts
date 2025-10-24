@@ -170,8 +170,6 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-  }
-}
 
 // Instagram 发布函数
 async function publishToInstagram(accessToken: string, content: string, accountId: string) {
