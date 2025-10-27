@@ -1,25 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-// import Stripe from 'stripe'
+import Stripe from 'stripe'
 
-// TODO: 安装 Stripe 包后取消注释
-// npm install @stripe/stripe-js stripe
-
-/*
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-09-30.clover',
 })
-*/
 
 export async function POST(request: NextRequest) {
   try {
-    return NextResponse.json(
-      { error: 'Stripe is not installed yet. Please run: npm install @stripe/stripe-js stripe' },
-      { status: 503 }
-    )
-
-    /* TODO: 安装 Stripe 后取消注释以下代码
     const { planId, email } = await request.json()
 
     const cookieStore = await cookies()
@@ -82,7 +71,6 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({ sessionId: session_stripe.id, url: session_stripe.url })
-    */
   } catch (error: any) {
     console.error('Error creating checkout session:', error)
     return NextResponse.json(

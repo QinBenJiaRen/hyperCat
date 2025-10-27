@@ -1,118 +1,126 @@
 import { NextRequest, NextResponse } from 'next/server'
-// import Stripe from 'stripe'
+import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
-// TODO: 安装 Stripe 包后取消注释
-// npm install @stripe/stripe-js stripe
-
-/*
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-09-30.clover',
 })
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
-*/
 
-// Supabase Admin Client for server-side operations
+// 使用 Service Role Key 来绕过 RLS
+// 注意：在构建时这些可能为空，但运行时需要
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 )
 
 export async function POST(request: NextRequest) {
-  // TODO: 安装 Stripe 后取消注释
-  return NextResponse.json(
-    { error: 'Stripe is not installed yet. Please run: npm install @stripe/stripe-js stripe' },
-    { status: 503 }
-  )
-
-  /* TODO: 安装 Stripe 后取消注释以下代码
-  const body = await request.text()
-  const signature = request.headers.get('stripe-signature')!
-
-  let event: Stripe.Event
-
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
-  } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message)
-    return NextResponse.json(
-      { error: `Webhook Error: ${err.message}` },
-      { status: 400 }
-    )
-  }
+    // 检查必需的环境变量
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY is not set')
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      )
+    }
 
-  // 处理事件
-  try {
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      console.error('STRIPE_WEBHOOK_SECRET is not set')
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      )
+    }
+
+    const body = await request.text()
+    const signature = request.headers.get('stripe-signature')!
+
+    let event: Stripe.Event
+
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+    } catch (err: any) {
+      console.error('Webhook signature verification failed:', err.message)
+      return NextResponse.json(
+        { error: `Webhook Error: ${err.message}` },
+        { status: 400 }
+      )
+    }
+
+    // 处理不同的事件类型
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
         const userId = session.metadata?.userId
         const planId = session.metadata?.planId
 
-        if (userId && planId) {
-          // 更新用户订阅状态到数据库
-          const { error } = await supabaseAdmin
-            .from('user_profiles')
-            .update({
-              subscription_plan: planId,
-              subscription_status: 'active',
-              stripe_customer_id: session.customer as string,
-              stripe_subscription_id: session.subscription as string,
-            })
-            .eq('id', userId)
+        if (!userId || !planId) {
+          console.error('Missing metadata in checkout session')
+          break
+        }
 
-          if (error) {
-            console.error('Error updating user subscription:', error)
-          }
+        // 更新用户订阅信息
+        const { error } = await supabaseAdmin
+          .from('user_profiles')
+          .update({
+            subscription_plan: planId,
+            subscription_status: 'active',
+            stripe_customer_id: session.customer,
+            stripe_subscription_id: session.subscription,
+          })
+          .eq('id', userId)
 
-          // 保存到本地存储（在客户端处理）
-          console.log('Subscription activated for user:', userId, 'Plan:', planId)
+        if (error) {
+          console.error('Error updating user subscription:', error)
+        } else {
+          console.log(`Subscription activated for user ${userId}`)
         }
         break
       }
 
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription
-        const customerId = subscription.customer as string
+        const stripeCustomerId = subscription.customer as string
 
-        // 根据 customer ID 查找用户
-        const { data: user } = await supabaseAdmin
+        // 获取订阅状态
+        const status = subscription.status
+
+        // 根据 customer ID 查找并更新用户
+        const { error } = await supabaseAdmin
           .from('user_profiles')
-          .select('id')
-          .eq('stripe_customer_id', customerId)
-          .single()
+          .update({
+            subscription_status: status,
+          })
+          .eq('stripe_customer_id', stripeCustomerId)
 
-        if (user) {
-          await supabaseAdmin
-            .from('user_profiles')
-            .update({
-              subscription_status: subscription.status,
-            })
-            .eq('id', user.id)
+        if (error) {
+          console.error('Error updating subscription status:', error)
+        } else {
+          console.log(`Subscription updated for customer ${stripeCustomerId}`)
         }
         break
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription
-        const customerId = subscription.customer as string
+        const stripeCustomerId = subscription.customer as string
 
-        // 根据 customer ID 查找用户
-        const { data: user } = await supabaseAdmin
+        // 将用户降级为免费计划
+        const { error } = await supabaseAdmin
           .from('user_profiles')
-          .select('id')
-          .eq('stripe_customer_id', customerId)
-          .single()
+          .update({
+            subscription_plan: 'free',
+            subscription_status: 'inactive',
+            subscription_current_period_end: null,
+          })
+          .eq('stripe_customer_id', stripeCustomerId)
 
-        if (user) {
-          await supabaseAdmin
-            .from('user_profiles')
-            .update({
-              subscription_plan: 'free',
-              subscription_status: 'canceled',
-            })
-            .eq('id', user.id)
+        if (error) {
+          console.error('Error downgrading subscription:', error)
+        } else {
+          console.log(`Subscription canceled for customer ${stripeCustomerId}`)
         }
         break
       }
@@ -122,12 +130,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ received: true })
-  } catch (err: any) {
-    console.error('Error processing webhook:', err)
+  } catch (error: any) {
+    console.error('Error processing webhook:', error)
     return NextResponse.json(
-      { error: 'Webhook handler failed' },
+      { error: error.message || 'Webhook processing failed' },
       { status: 500 }
     )
   }
-  */
 }
