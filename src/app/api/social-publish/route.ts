@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createRouteHandlerClient({ cookies })
+    const cookieStore = await cookies()
+    const supabase = createRouteHandlerClient({ 
+      cookies: () => Promise.resolve(cookieStore)
+    })
     
     // 获取当前用户
     const { data: { session } } = await supabase.auth.getSession()
@@ -147,7 +150,10 @@ export async function POST(request: NextRequest) {
     
     // 记录失败的发布
     try {
-      const supabase = createRouteHandlerClient({ cookies })
+      const cookieStore = await cookies()
+      const supabase = createRouteHandlerClient({ 
+        cookies: () => Promise.resolve(cookieStore)
+      })
       const { data: { session } } = await supabase.auth.getSession()
       const body = await request.json()
       

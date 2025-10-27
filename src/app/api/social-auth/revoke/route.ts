@@ -11,7 +11,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const cookieStore = await cookies()
+    const supabase = createRouteHandlerClient({ 
+      cookies: () => Promise.resolve(cookieStore)
+    })
     
     // 获取当前用户
     const { data: { session } } = await supabase.auth.getSession()

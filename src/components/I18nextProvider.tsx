@@ -9,11 +9,17 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 import en from '../../public/locales/en/common.json'
 import zh from '../../public/locales/zh/common.json'
 import de from '../../public/locales/de/common.json'
+import es from '../../public/locales/es/common.json'
+import fr from '../../public/locales/fr/common.json'
+import ja from '../../public/locales/ja/common.json'
 
 const resources = {
   en: { common: en },
   zh: { common: zh },
-  de: { common: de }
+  de: { common: de },
+  es: { common: es },
+  fr: { common: fr },
+  ja: { common: ja }
 }
 
 const i18nInstance = i18next.createInstance()
@@ -24,7 +30,7 @@ i18nInstance
   .init({
     resources,
     fallbackLng: 'en',
-    supportedLngs: ['en', 'zh', 'de'],
+    supportedLngs: ['en', 'zh', 'de', 'es', 'fr', 'ja'],
     ns: ['common'],
     defaultNS: 'common',
     interpolation: {

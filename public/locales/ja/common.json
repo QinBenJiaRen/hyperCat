@@ -1,0 +1,108 @@
+{
+  "nav": {
+    "contentCreation": "コンテンツ作成",
+    "contentCalender": "コンテンツカレンダー",
+    "publishing": "公開",
+    "analytics": "分析",
+    "membership": "メンバーシップ",
+    "settings": "設定"
+  },
+  "contentCreation": {
+    "model": "モデル",
+    "product": "製品カテゴリー",
+    "purpose": "目的",
+    "productInformation": "製品情報",
+    "productPlaceholder": "製品について教えてください...",
+    "hotKeywords": "人気キーワード",
+    "realtimeTrends": "リアルタイムトレンド更新",
+    "hotTitles": "人気タイトル",
+    "generating": "生成中...",
+    "generate": "生成",
+    "noSensitiveWords": "センシティブな単語は見つかりませんでした",
+    "sensitiveFilter": "センシティブワードフィルター",
+    "publishDate": "公開日:",
+    "publishing": "公開中",
+    "published": "公開しました！",
+    "publishingLater": "後で公開",
+    "publishedLater": "スケジュール済み！",
+    "noContentToPublish": "公開するコンテンツがありません",
+    "publishError": "コンテンツの公開に失敗しました。もう一度お試しください。",
+    "publishNow": "{{platform}}に今すぐ公開",
+    "publishingNow": "公開中...",
+    "publishedNow": "公開しました！",
+    "authorizedAs": "{{account}}として接続済み",
+    "authorizeAccount": "アカウントを接続",
+    "authorizeTitle": "{{platform}}アカウントを接続",
+    "authorizeDescription": "HypeCat AIから直接コンテンツを公開するには、{{platform}}アカウントを認証する必要があります。",
+    "authorize": "認証",
+    "cancel": "キャンセル",
+    "enterProductInfo": "製品情報を入力してください",
+    "requestTimeout": "リクエストがタイムアウトしました（15秒）- もう一度お試しください",
+    "generateError": "コンテンツの生成に失敗しました - もう一度お試しください",
+    "refreshContent": "現在のプラットフォームのコンテンツを更新",
+    "refreshError": "コンテンツの更新に失敗しました - もう一度お試しください",
+    "selectTitleFirst": "最初にタイトルを選択してください",
+    "productImages": "製品画像",
+    "uploadImage": "画像をアップロード",
+    "removeImage": "画像を削除",
+    "maxImagesLimit": "最大5枚の画像が許可されています",
+    "invalidImageType": "画像ファイルのみをアップロードしてください",
+    "imageTooLarge": "画像サイズは5MBを超えないでください",
+    "onboarding": {
+      "step1": "お気に入りのLLMモデルを選択してください",
+      "step2": "製品名や成分を入力できます",
+      "step3": "この投稿の目的は何ですか？",
+      "step4": "最新のトレンドワードと投稿をリンクしましょう",
+      "dontShowAgain": "今後表示しない",
+      "continue": "続ける",
+      "skip": "スキップ"
+    },
+    "models": {
+      "auto": "自動",
+      "deepseek": "DeepSeek-V3.1",
+      "gpt41": "GPT-4.1",
+      "gpt4": "GPT-4",
+      "o3mini": "O3-mini"
+    },
+    "products": {
+      "fitness": "フィットネス",
+      "motherBaby": "母子用品",
+      "beauty": "美容",
+      "sportsEquipment": "スポーツ用品"
+    },
+    "purposes": {
+      "awareness": "認知度向上",
+      "engagement": "エンゲージメント",
+      "sales": "販売",
+      "education": "教育",
+      "community": "コミュニティ"
+    },
+    "platformContent": {
+      "clickToGenerate": "上のタイトルをクリックして{{platform}}のプロモーションコンテンツを生成"
+    }
+  },
+  "email": {
+    "welcome": "HypeCatAIへようこそ",
+    "description": "続行するにはメールアドレスを入力してください。設定とコンテンツを保存するために使用します。",
+    "placeholder": "メールアドレスを入力",
+    "submit": "続行",
+    "submitting": "保存中...",
+    "required": "メールアドレスは必須です",
+    "invalid": "有効なメールアドレスを入力してください",
+    "error": "メールの保存に失敗しました。もう一度お試しください。"
+  },
+  "feedback": {
+    "title": "フィードバック",
+    "subtitle": "ご意見をお聞かせください！あなたの考えを共有してください。",
+    "typeLabel": "フィードバックの種類",
+    "bug": "バグ報告",
+    "suggestion": "提案",
+    "other": "その他",
+    "messageLabel": "メッセージ",
+    "messagePlaceholder": "体験について教えてください...",
+    "submit": "フィードバックを送信",
+    "submitting": "送信中...",
+    "success": "フィードバックありがとうございます！",
+    "error": "フィードバックの送信に失敗しました。もう一度お試しください。"
+  }
+}

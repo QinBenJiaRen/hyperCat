@@ -348,21 +348,19 @@ export default function MainLayout({ children }: LayoutProps) {
                 onClick={() => router.push('/content-creation')}
                 className={`flex items-center ${isSidebarCollapsed ? 'scale-90' : ''} transition-transform duration-300 hover:opacity-80`}
               >
-                <div className={`${isSidebarCollapsed ? 'w-14 h-14 mr-0' : 'w-16 h-16 mr-1.5'} rounded-full overflow-hidden transition-all duration-300 flex-shrink-0`}>
+                <div className={`${isSidebarCollapsed ? 'w-14 h-14 mr-0' : 'w-16 h-16 mr-3'} transition-all duration-300 flex-shrink-0`}>
                   <img 
-                    src="/images/logo.jpg"
+                    src="/images/logo.png"
                     alt="HypeCat Logo"
-                    className="w-full h-full object-cover object-top"
-                    style={{ objectPosition: 'center 30%' }}
+                    className="w-full h-full object-contain"
                   />
                 </div>
                 <div className={`flex items-center ${isSidebarCollapsed ? 'hidden' : ''}`}>
-                  <span className="text-orange-500 text-2xl font-bold leading-none">
-                    HypeCat
-                  </span>
-                  <span className="text-gray-700 text-2xl font-bold leading-none">
-                    AI
-                  </span>
+                  <img 
+                    src="/images/hypecat.png"
+                    alt="HypeCat AI"
+                    className="h-8 w-auto object-contain"
+                  />
                 </div>
               </button>
             </div>
@@ -559,15 +557,33 @@ export default function MainLayout({ children }: LayoutProps) {
           </button>
 
           {/* Language Selector */}
-          <div className={`flex items-center space-x-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-            </svg>
-            <span>
-              {i18nInstance.language === 'zh' ? '中文' : 
-               i18nInstance.language === 'de' ? 'Deutsch' : 
-               'English'}
-            </span>
+          <div className="relative">
+            <select
+              value={i18nInstance.language}
+              onChange={async (e) => {
+                const newLang = e.target.value
+                await i18nInstance.changeLanguage(newLang)
+                localStorage.setItem('preferredLanguage', newLang)
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 pr-8 rounded-lg text-sm font-medium border transition-colors appearance-none cursor-pointer ${
+                isDarkMode
+                  ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
+                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+              }}
+            >
+              <option value="en">🇬🇧 English</option>
+              <option value="zh">🇨🇳 中文</option>
+              <option value="de">🇩🇪 Deutsch</option>
+              <option value="es">🇪🇸 Español</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="ja">🇯🇵 日本語</option>
+            </select>
           </div>
         </div>
 

@@ -27,7 +27,7 @@ export default function SettingsPage() {
               {/* Language Settings */}
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Language / 语言 / Sprache
+                  Language / 语言 / Sprache / Español / Français / 日本語
                 </h2>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <label htmlFor="language-select" className="block text-sm font-medium text-gray-700 mb-2">
@@ -39,9 +39,12 @@ export default function SettingsPage() {
                     value={i18nInstance.language}
                     onChange={handleLanguageChange}
                   >
-                    <option value="en">English</option>
-                    <option value="zh">中文</option>
-                    <option value="de">Deutsch</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="ja">🇯🇵 日本語</option>
                   </select>
                   <p className="mt-2 text-sm text-gray-500">
                     Changes will be applied immediately

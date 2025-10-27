@@ -13,43 +13,38 @@ export async function GET(
 
   if (!code) {
     return new NextResponse(
-      `
-      <!DOCTYPE html>
-      <html>
-        <head><title>Authorization Failed</title></head>
-        <body>
-          <script>
-            alert('Authorization failed or was cancelled');
-            window.close();
-          </script>
-        </body>
-      </html>
-      `,
-      { headers: { 'Content-Type': 'text/html' } }
+      `<!DOCTYPE html><html><head><title>Auth Failed</title></head><body><script>
+if(window.opener){window.opener.postMessage({type:'oauth-error',message:'Authorization failed'},'*');window.close();}else{window.location.href='/content-creation';}
+</script></body></html>`,
+      { 
+        headers: { 
+          'Content-Type': 'text/html',
+          'Cache-Control': 'no-store',
+        } 
+      }
     )
   }
 
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const cookieStore = await cookies()
+    const supabase = createRouteHandlerClient({ 
+      cookies: () => Promise.resolve(cookieStore)
+    })
     
     // 获取当前用户
     const { data: { session } } = await supabase.auth.getSession()
     
     if (!session) {
       return new NextResponse(
-        `
-        <!DOCTYPE html>
-        <html>
-          <head><title>Not Logged In</title></head>
-          <body>
-            <script>
-              alert('Please log in first');
-              window.close();
-            </script>
-          </body>
-        </html>
-        `,
-        { headers: { 'Content-Type': 'text/html' } }
+        `<!DOCTYPE html><html><head><title>Not Logged In</title></head><body><script>
+if(window.opener){window.opener.postMessage({type:'oauth-error',message:'Please log in first'},'*');window.close();}else{window.location.href='/login';}
+</script></body></html>`,
+        { 
+          headers: { 
+            'Content-Type': 'text/html',
+            'Cache-Control': 'no-store',
+          } 
+        }
       )
     }
 
@@ -80,88 +75,30 @@ export async function GET(
       throw error
     }
 
-    // 返回成功页面并关闭窗口
+    // 返回最小化脚本，立即执行
     return new NextResponse(
-      `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Authorization Successful</title>
-          <style>
-            body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              height: 100vh;
-              margin: 0;
-              background: #f5f5f5;
-            }
-            .success {
-              text-align: center;
-              background: white;
-              padding: 40px;
-              border-radius: 8px;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            .checkmark {
-              width: 60px;
-              height: 60px;
-              border-radius: 50%;
-              background: #4CAF50;
-              color: white;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              margin: 0 auto 20px;
-              font-size: 30px;
-            }
-            h1 {
-              color: #333;
-              margin: 0 0 10px;
-            }
-            p {
-              color: #666;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="success">
-            <div class="checkmark">✓</div>
-            <h1>Authorization Successful!</h1>
-            <p>You have successfully connected your ${platform} account.</p>
-            <p>This window will close automatically...</p>
-          </div>
-          <script>
-            setTimeout(() => {
-              window.close();
-            }, 2000);
-          </script>
-        </body>
-      </html>
-      `,
+      `<!DOCTYPE html><html><head><title>Auth</title></head><body><script>
+if(window.opener){window.opener.postMessage({type:'oauth-success',platform:'${platform}',accountName:'${authData.account_name}'},'*');window.close();}else{window.location.href='/content-creation';}
+</script></body></html>`,
       {
         headers: {
           'Content-Type': 'text/html',
+          'Cache-Control': 'no-store',
         },
       }
     )
   } catch (error) {
     console.error('Error in OAuth callback:', error)
     return new NextResponse(
-      `
-      <!DOCTYPE html>
-      <html>
-        <head><title>Authorization Error</title></head>
-        <body>
-          <script>
-            alert('An error occurred during authorization');
-            window.close();
-          </script>
-        </body>
-      </html>
-      `,
-      { headers: { 'Content-Type': 'text/html' } }
+      `<!DOCTYPE html><html><head><title>Auth Error</title></head><body><script>
+if(window.opener){window.opener.postMessage({type:'oauth-error',message:'Authorization error'},'*');window.close();}else{window.location.href='/content-creation';}
+</script></body></html>`,
+      { 
+        headers: { 
+          'Content-Type': 'text/html',
+          'Cache-Control': 'no-store',
+        } 
+      }
     )
   }
 }

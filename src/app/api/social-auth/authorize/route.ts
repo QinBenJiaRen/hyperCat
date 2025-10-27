@@ -37,96 +37,9 @@ export async function GET(request: NextRequest) {
 
   // 检查是否配置了 OAuth 凭证
   if (!config.clientId) {
-    // 如果没有配置，返回一个演示页面
-    return new NextResponse(
-      `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>OAuth Configuration Required</title>
-          <style>
-            body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-              max-width: 600px;
-              margin: 100px auto;
-              padding: 20px;
-              background: #f5f5f5;
-            }
-            .card {
-              background: white;
-              border-radius: 8px;
-              padding: 30px;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            h1 {
-              color: #333;
-              margin-bottom: 20px;
-            }
-            p {
-              color: #666;
-              line-height: 1.6;
-              margin-bottom: 15px;
-            }
-            code {
-              background: #f0f0f0;
-              padding: 2px 6px;
-              border-radius: 3px;
-              font-family: monospace;
-              color: #e83e8c;
-            }
-            .button {
-              background: #0070f3;
-              color: white;
-              border: none;
-              padding: 10px 20px;
-              border-radius: 5px;
-              cursor: pointer;
-              margin-top: 20px;
-            }
-            .button:hover {
-              background: #0051cc;
-            }
-            .demo-mode {
-              background: #fff3cd;
-              border: 1px solid #ffc107;
-              padding: 15px;
-              border-radius: 5px;
-              margin-top: 20px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="card">
-            <h1>🔑 OAuth Configuration Required</h1>
-            <p>To enable ${platform.toUpperCase()} publishing, please configure your OAuth credentials in the environment variables:</p>
-            <ul>
-              <li><code>${platform.toUpperCase()}_CLIENT_ID</code></li>
-              <li><code>${platform.toUpperCase()}_CLIENT_SECRET</code></li>
-            </ul>
-            <div class="demo-mode">
-              <strong>Demo Mode:</strong> For testing purposes, you can simulate authorization by clicking the button below.
-            </div>
-            <button class="button" onclick="simulateAuth()">Simulate Authorization</button>
-          </div>
-          <script>
-            function simulateAuth() {
-              // 模拟授权成功
-              fetch('/api/social-auth/callback/${platform}?code=demo_code&state=demo', {
-                method: 'GET'
-              }).then(() => {
-                window.close();
-              });
-            }
-          </script>
-        </body>
-      </html>
-      `,
-      {
-        headers: {
-          'Content-Type': 'text/html',
-        },
-      }
-    )
+    // Demo 模式：直接模拟授权成功并立即跳转
+    const callbackUrl = `${config.redirectUri}?code=demo_code&state=demo`
+    return NextResponse.redirect(callbackUrl)
   }
 
   // 构建授权 URL

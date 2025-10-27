@@ -1,0 +1,108 @@
+{
+  "nav": {
+    "contentCreation": "Creación de Contenido",
+    "contentCalender": "Calendario de Contenido",
+    "publishing": "Publicación",
+    "analytics": "Análisis",
+    "membership": "Membresía",
+    "settings": "Configuración"
+  },
+  "contentCreation": {
+    "model": "Modelo",
+    "product": "Categoría de Producto",
+    "purpose": "Propósito",
+    "productInformation": "Información del Producto",
+    "productPlaceholder": "Cuéntanos sobre tu producto...",
+    "hotKeywords": "Palabras Clave Populares",
+    "realtimeTrends": "Actualización de tendencias en tiempo real",
+    "hotTitles": "Títulos Populares",
+    "generating": "Generando...",
+    "generate": "Generar",
+    "noSensitiveWords": "No se encontraron palabras sensibles",
+    "sensitiveFilter": "Filtro de Palabras Sensibles",
+    "publishDate": "Fecha de publicación:",
+    "publishing": "Publicando",
+    "published": "¡Publicado!",
+    "publishingLater": "Publicar Más Tarde",
+    "publishedLater": "¡Programado!",
+    "noContentToPublish": "No hay contenido para publicar",
+    "publishError": "Error al publicar contenido. Inténtalo de nuevo.",
+    "publishNow": "Publicar Ahora en {{platform}}",
+    "publishingNow": "Publicando...",
+    "publishedNow": "¡Publicado!",
+    "authorizedAs": "Conectado como {{account}}",
+    "authorizeAccount": "Conectar Cuenta",
+    "authorizeTitle": "Conectar Cuenta de {{platform}}",
+    "authorizeDescription": "Necesitas autorizar tu cuenta de {{platform}} para publicar contenido directamente desde HypeCat AI.",
+    "authorize": "Autorizar",
+    "cancel": "Cancelar",
+    "enterProductInfo": "Por favor ingresa información del producto",
+    "requestTimeout": "Tiempo de espera agotado (15s) - inténtalo de nuevo",
+    "generateError": "Error al generar contenido - inténtalo de nuevo",
+    "refreshContent": "Actualizar contenido para la plataforma actual",
+    "refreshError": "Error al actualizar contenido - inténtalo de nuevo",
+    "selectTitleFirst": "Por favor selecciona un título primero",
+    "productImages": "Imágenes del Producto",
+    "uploadImage": "Subir Imagen",
+    "removeImage": "Eliminar imagen",
+    "maxImagesLimit": "Máximo 5 imágenes permitidas",
+    "invalidImageType": "Por favor sube solo archivos de imagen",
+    "imageTooLarge": "El tamaño de la imagen no debe exceder 5MB",
+    "onboarding": {
+      "step1": "Elige tu modelo LLM favorito",
+      "step2": "Puedes ingresar nombres de productos o incluso ingredientes",
+      "step3": "¿Para qué propósito es esta publicación?",
+      "step4": "Vincula tu publicación con las palabras de moda recién actualizadas",
+      "dontShowAgain": "No mostrar de nuevo",
+      "continue": "Continuar",
+      "skip": "Omitir"
+    },
+    "models": {
+      "auto": "Auto",
+      "deepseek": "DeepSeek-V3.1",
+      "gpt41": "GPT-4.1",
+      "gpt4": "GPT-4",
+      "o3mini": "O3-mini"
+    },
+    "products": {
+      "fitness": "Fitness",
+      "motherBaby": "Madre y Bebé",
+      "beauty": "Belleza",
+      "sportsEquipment": "Equipo Deportivo"
+    },
+    "purposes": {
+      "awareness": "Conciencia",
+      "engagement": "Compromiso",
+      "sales": "Ventas",
+      "education": "Educación",
+      "community": "Comunidad"
+    },
+    "platformContent": {
+      "clickToGenerate": "Haz clic en el título de arriba para generar contenido promocional de {{platform}}"
+    }
+  },
+  "email": {
+    "welcome": "Bienvenido a HypeCatAI",
+    "description": "Por favor ingresa tu dirección de correo electrónico para continuar. La usaremos para guardar tus preferencias y contenido.",
+    "placeholder": "Ingresa tu dirección de correo electrónico",
+    "submit": "Continuar",
+    "submitting": "Guardando...",
+    "required": "El correo electrónico es obligatorio",
+    "invalid": "Por favor ingresa una dirección de correo electrónico válida",
+    "error": "Error al guardar el correo electrónico. Inténtalo de nuevo."
+  },
+  "feedback": {
+    "title": "Retroalimentación",
+    "subtitle": "¡Valoramos tu opinión! Por favor comparte tus comentarios con nosotros.",
+    "typeLabel": "Tipo de Retroalimentación",
+    "bug": "Reporte de Error",
+    "suggestion": "Sugerencia",
+    "other": "Otro",
+    "messageLabel": "Tu Mensaje",
+    "messagePlaceholder": "Cuéntanos más sobre tu experiencia...",
+    "submit": "Enviar Retroalimentación",
+    "submitting": "Enviando...",
+    "success": "¡Gracias por tu retroalimentación!",
+    "error": "Error al enviar retroalimentación. Inténtalo de nuevo."
+  }
+}

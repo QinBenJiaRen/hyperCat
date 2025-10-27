@@ -15,11 +15,6 @@ export default function DebugAuthPage() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            full_name: 'Test User',
-          },
-        },
       })
       setResult({ type: 'signUp', data, error })
     } catch (e) {

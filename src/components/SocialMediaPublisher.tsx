@@ -30,6 +30,24 @@ export default function SocialMediaPublisher({
   // 检查授权状态
   useEffect(() => {
     checkAuthStatus()
+    
+    // 监听 OAuth 回调消息
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'oauth-success') {
+        if (event.data.platform === platform) {
+          // 授权成功，刷新状态
+          checkAuthStatus()
+          setShowAuthModal(false)
+        }
+      } else if (event.data.type === 'oauth-error') {
+        // 授权失败，显示错误
+        onPublishError?.(event.data.message || 'Authorization failed')
+        setShowAuthModal(false)
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
   }, [platform])
 
   const checkAuthStatus = async () => {
@@ -53,20 +71,12 @@ export default function SocialMediaPublisher({
     const left = window.screenX + (window.outerWidth - width) / 2
     const top = window.screenY + (window.outerHeight - height) / 2
     
-    const authWindow = window.open(
+    window.open(
       authUrl,
       'social-auth',
       `width=${width},height=${height},left=${left},top=${top}`
     )
-
-    // 监听授权完成
-    const checkAuth = setInterval(() => {
-      if (authWindow?.closed) {
-        clearInterval(checkAuth)
-        checkAuthStatus()
-        setShowAuthModal(false)
-      }
-    }, 500)
+    // 窗口会通过 postMessage 通知授权结果
   }
 
   // 取消授权
