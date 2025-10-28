@@ -170,3 +170,17 @@ stripe listen --forward-to localhost:3001/api/stripe/webhook
 5. 测试完整支付流程
 
 完成这些步骤后，Stripe 支付就完全集成了！🎉
+
+
+
+查看当前项目的代码和配置，对该项目进行部份重构，重构要求：
+1. 将和数据库supabase相关的代码从当前项目中迁移至Users/haifeng/Project/hyperCatServer中
+2. 将支付相关的代码从当前项目中迁移至Users/haifeng/Project/hyperCatServer中
+3. 将授权登陆，注册新用户，普通登陆的代码从当前项目中迁移至Users/haifeng/Project/hyperCatServer中
+4. 在Users/haifeng/Project/hyperCatServer 1-3点迁移的内容需要在hyperCatServer中实现，请使用Nodejs进行实现，如果需要在hyperCatServer中调用，请使用axios进行调用；
+5. hyperCatServer 服务使用3001端口，服务名称为hyperCatServer, 本地访问使用ip+端口的方式；线上服务使用api.hypecat.com域名进行访问;
+6. 当前项目中的配置，涉及到迁移功能的，都挪动至Users/haifeng/Project/hyperCatServer中
+7. 添加一个接口，用于获取当前用户订阅信息，接口路径为/api/stripe/getSubscriptionInfo，接口返回内容为当前用户的订阅信息，返回内容为json格式，返回内容为{}
+8. 迁移完成后，检查当前项目和新项目，确保没有任何问题；
+9. 迁移后，启动2个项目，根据当前已有的功能进行自测，确保当前已有的流程正常；
+
